@@ -22,19 +22,22 @@ dControlData = { "Action": "nothing", "AttackNumber": 300 }
 #print (dControlData['Action'])
 #controlFile.close()
 
-sCommands ="(a)ttack,capture,capturepet,detectpet,exit or ctlr-c':"
+sCommands ="(a)ttack,capture,capturepet,detectpet,exit,processfile or ctlr-c':"
 print(sCommands)
 command = ""
+previousCommand = ""
 while str(command) != 'wow':
     command = raw_input(">")#for widows, use input.
     if command == "a":
         command = "attack"
-    #if command == "detectpet"
-        
+    if command == "processfile":
+        Processfile()
+        command = previousCommand
     dControlData['Action'] = str(command)
     controlFile = open( strControlFile, "wb" )
     pickle.dump( dControlData, controlFile ,protocol=2)
     controlFile.close()
+    previousCommand = command
 
     
 
