@@ -1,5 +1,10 @@
 import pickle
 import sys
+import os
+sys.path.append(os.path.abspath("/mnt/pythoncode"))
+from train import Processfile
+
+Processfile()
 
 dControlData = {}
 
