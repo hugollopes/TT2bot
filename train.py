@@ -325,7 +325,7 @@ def trainGraph(image_size,num_labels):
         print ("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
 
 def Processfile():
-    preProcess = False
+    preProcess = True
     iImgSize = 40
     pixel_depth = 255.0  # Number of levels per pixel.
     folderPath="/mnt/pythoncode/dataforclassifier/TT2classified"
