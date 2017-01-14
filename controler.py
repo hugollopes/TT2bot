@@ -7,17 +7,20 @@ imagenumber = 1
 def captureImage( imagenumber ):
     start = time.time()
     #tupSquare=(500,500,10,10)
-    result = device.takeSnapshot()#.getSubImage(tupSquare)
+    #result = device.takeSnapshot()#.getSubImage(tupSquare)
     # Writes the screenshot to a file
-    s="C:\Users\TGDLOHU1\Downloads\imagecaptures\shotnm"+str(imagenumber) + ".png"
+    #s="C:\Users\TGDLOHU1\Downloads\imagecaptures\shotnm"+str(imagenumber) + ".png"
     #s2="adb pull /sdcard/foo2.png " + "C:\Users\TGDLOHU1\Downloads\imagecaptures\shot2nm"+str(i) + ".png"
-    #sfile="/sdcard/snapshot/c" + str(i) + ".png"
+    #sfile="/sdcard/snapshot/c" + str(i) + ".png
+    sfile="/sdcard/windows/BstSharedFolder/c" + str(imagenumber) + ".raw"
     #sshell="screencap -p > " + sfile
+    sshell="screencap  > " + sfile
+    device.shell(sshell)
     #print sshell
     #sdir=" C:\\Users\\TGDLOHU1\\Downloads\\imagecaptures\\"
     #print sdir
     #spull="adb pull " + sfile + sdir
-    result.writeToFile(s,'png')
+    #result.writeToFile(s,'png')
     end = time.time()
     print "captureImage time: ", end - start
     return
