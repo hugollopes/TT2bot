@@ -21,6 +21,15 @@ def ensure_dir(d):
 
 #check for class folders, and copy data to mirror location.
 def checkFolders(folderPath,folderPathProcessed,preProcess):
+    #first delete all preprocessed
+    processedFolderlist = os.listdir(folderPathProcessed)
+    for f in processedFolderlist:
+        processedFolderlistpath = folderPathProcessed + "/" +f
+        processedfolderfiles = os.listdir(processedFolderlistpath)
+        for d in processedfolderfiles:
+            processedFolderlistfilesPath = folderPathProcessed + "/" +f + "/" + d
+            os.remove(processedFolderlistfilesPath)
+    print("finish removing files")    
     files = os.listdir(folderPath)
     folderList=[]
     iNumberClasses = len(files)
@@ -249,9 +258,9 @@ def trainGraph(image_size,num_labels):
 
     _imageSize = image_size
     _numLabels = num_labels
-    _trainSubset = 396
+    _trainSubset = 5000
     _batchSize = 128
-    _hiddenLayers = [50,20]
+    _hiddenLayers = [200,30]
     _numInputs = _imageSize * _imageSize
     _startLearningRate = 0.5
     _learningDecayRate = 0.98
@@ -344,7 +353,7 @@ def trainGraph(image_size,num_labels):
         
 
 def Processfile():
-    preProcess = True
+    preProcess = True #read again the raw files?
     iImgSize = 40
     pixel_depth = 255.0  # Number of levels per pixel.
     folderPath="/mnt/pythoncode/dataforclassifier/TT2classified"
@@ -375,8 +384,7 @@ def getSingleImageTensor(img_size,pixel_depth):
     return image
 
 def savePrediction(filecounts,prediction):
-    i=filecounts[prediction]
-    print("saving file number",i)
+    print("saving file number",filecounts)
     if prediction==0:
         path= "goldpet"
     if prediction==1:
@@ -384,9 +392,9 @@ def savePrediction(filecounts,prediction):
     if prediction==2:
         path ="normalpet"
     if prediction==3:
-        path ="partialpet"
+        path ="partial pet"
     imagefile = "/mnt/pythoncode/detect.png"
-    targetfile = "/mnt/pythoncode/dataforclassifier/TT2predictionsamples/" + path + "/sample"+ str(i) +".png"
+    targetfile = "/mnt/pythoncode/dataforclassifier/TT2predictionsamples/" + path + "/sample"+ str(filecounts) +".png"
     #print("targetfile",targetfile)
     shutil.copy(imagefile, targetfile)
     
@@ -401,7 +409,7 @@ def getmax(l):
     return max_idx, max_val
 
 def predictpet(filecounts):
-    _hiddenLayers = [50,20]
+    _hiddenLayers = [200,30]
     _imageSize = 40
     pixel_depth = 255.0
     model_file = "/mnt/pythoncode/dataforclassifier/" + 'petdetectionmodel.ckpt.meta'
@@ -426,5 +434,5 @@ def predictpet(filecounts):
     prediction,max_val = getmax(predictions[0])
     savePrediction(filecounts,prediction)
     print("prediction:",prediction)
-    filecounts[prediction] = filecounts[prediction] + 1
+    filecounts = filecounts + 1
     return prediction,filecounts
