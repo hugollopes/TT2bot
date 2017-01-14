@@ -239,8 +239,11 @@ def generateLossCalc(weights, biases, numHiddenLayers, trainingNetwork, training
     loss += regularizationRate * regularizers
     return loss
 
+
+
 def trainGraph(image_size,num_labels):
     pickle_file = "/mnt/pythoncode/dataforclassifier/" + 'TT2.pickle'
+    model_file = "/mnt/pythoncode/dataforclassifier/" + 'petdetectionmodel.ckpt'
     batch_size = 128
     print("image_size ",image_size,"num_labels ",num_labels) 
 
@@ -289,6 +292,7 @@ def trainGraph(image_size,num_labels):
 
         numHiddenLayers = _hiddenLayers.__len__()
         weights = generateWeights(_hiddenLayers, _numInputs, _numLabels)
+        print(weights)
         biases = generateBiases(_hiddenLayers, _numLabels)
         trainingNetwork = multilayerNetwork(tf_train_dataset, weights, biases, numHiddenLayers, True, _dropoutKeepRate)
         loss = generateLossCalc(weights, biases, numHiddenLayers, trainingNetwork, tf_train_labels, _regularizationRate)
@@ -299,7 +303,14 @@ def trainGraph(image_size,num_labels):
         train_prediction = tf.nn.softmax(multilayerNetwork(tf_train_dataset, weights, biases, numHiddenLayers, False, _dropoutKeepRate))
         valid_prediction = tf.nn.softmax(multilayerNetwork(tf_valid_dataset, weights, biases, numHiddenLayers, False, _dropoutKeepRate))
         test_prediction = tf.nn.softmax(multilayerNetwork(tf_test_dataset, weights, biases, numHiddenLayers, False, _dropoutKeepRate))
+        
 
+        oSaver = tf.train.Saver()
+        all_vars = tf.trainable_variables()
+        for v in all_vars:
+            print(v.name)
+            print(v.value())
+    
     with tf.Session(graph=graph) as session:
         tf.initialize_all_variables().run()
         print( "Initialized")
@@ -321,8 +332,16 @@ def trainGraph(image_size,num_labels):
                 print ("Minibatch loss at step", step, ":", l)
                 print ("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
                 print ("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(), valid_labels))
-
+        
         print ("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+        oSaver.save(session, model_file)  #filename ends with .ckpt
+
+    
+
+
+        
+
+        
 
 def Processfile():
     preProcess = True
@@ -340,6 +359,48 @@ def Processfile():
     readAndPickle(folderPathProcessed,iImgSize,iNumberImages,pixel_depth)
     trainGraph(iImgSize,iNumberClasses)
 
+#getsingleimage
+def getSingleImageTensor(img_size,pixel_depth):
+    imagefile = "/mnt/pythoncode/detect.png"
+    imagefileResized = "/mnt/pythoncode/detectResized.png"
+    img = Image.open(imagefile).convert('L')
+    imageTuple = (img_size,img_size)
+    img = img.resize(imageTuple)
+    img.save(imagefileResized)
+
+    image = np.ndarray((1, img_size, img_size), dtype=np.float32)
     
+    image[0,:,:] = (ndimage.imread(imagefileResized).astype(float) - pixel_depth / 2) / pixel_depth
+    image = image.reshape((-1, img_size * img_size)).astype(np.float32)
+    return image
+
+import operator
+def getmax(l):
+    max_idx, max_val = max(enumerate(l), key=operator.itemgetter(1))
+    return max_idx, max_val
+
+def predictpet():
+    _hiddenLayers = [50,20]
+    _imageSize = 40
+    pixel_depth = 255.0
+    model_file = "/mnt/pythoncode/dataforclassifier/" + 'petdetectionmodel.ckpt.meta'
+    sess = tf.Session()
+    new_saver = tf.train.import_meta_graph(model_file)
+    new_saver.restore(sess, tf.train.latest_checkpoint('/mnt/pythoncode/dataforclassifier/'))
+    all_vars = tf.trainable_variables()
+    tf_image_dataset = tf.placeholder(tf.float32, shape=(1, _imageSize * _imageSize))
+    h1=all_vars[0]
+    h2=all_vars[1]
+    out=all_vars[2]
+    b1=all_vars[3]
+    b2=all_vars[4]
+    bOut=all_vars[5]
     
+    hiddenLayer1 = tf.nn.relu(tf.matmul(tf_image_dataset, h1) + b1)
+    hiddenLayer2 = tf.nn.relu(tf.matmul(hiddenLayer1, h2) + b2)
+    finalLayer = tf.nn.softmax(tf.nn.relu(tf.matmul(hiddenLayer2, out) + bOut))
+
+    predict_dataset = getSingleImageTensor(_imageSize,pixel_depth)
+    predictions = sess.run(finalLayer, feed_dict={tf_image_dataset: predict_dataset})
+    print(getmax(predictions[0]))
     

@@ -2,7 +2,7 @@ import pickle
 import sys
 import os
 sys.path.append(os.path.abspath("/mnt/pythoncode"))
-from train import Processfile
+from train import Processfile,predictpet
 
 
 dControlData = {}
@@ -21,7 +21,7 @@ dControlData = { "Action": "nothing", "AttackNumber": 300 }
 #print (dControlData['Action'])
 #controlFile.close()
 
-sCommands ="(a)ttack,capture,capturepet,detectpet,exit,processfile or ctlr-c':"
+sCommands ="(a)ttack,capture,capturepet,(d)etectpet,exit,processfile or ctlr-c':"
 print(sCommands)
 command = ""
 previousCommand = ""
@@ -31,6 +31,9 @@ while str(command) != 'wow':
         command = "attack"
     if command == "processfile":
         Processfile()
+        command = previousCommand
+    if command == "detectpet" or command == "d":
+        predictpet()
         command = previousCommand
     dControlData['Action'] = str(command)
     controlFile = open( strControlFile, "wb" )
