@@ -120,6 +120,23 @@ while strAction != "Exit":
     if strAction == "detectpet":
         detectPetMode()
         resetfile(strControlFile,dControlData)
+    if strAction == "getgold":
+        print("getgold")
+        #hit center
+        device.touch(360,562,MonkeyDevice.DOWN_AND_UP)
+        MonkeyRunner.sleep(0.03)
+        device.touch(360,562,MonkeyDevice.DOWN_AND_UP)
+        MonkeyRunner.sleep(0.03)
+        device.touch(360,562,MonkeyDevice.DOWN_AND_UP)
+        MonkeyRunner.sleep(0.03)
+        #hit lowered pet
+        device.touch(427,614,MonkeyDevice.DOWN_AND_UP)
+        MonkeyRunner.sleep(0.03)
+        device.touch(427,614,MonkeyDevice.DOWN_AND_UP)
+        MonkeyRunner.sleep(0.03)
+        device.touch(427,614,MonkeyDevice.DOWN_AND_UP)
+        MonkeyRunner.sleep(0.03)
+        resetfile(strControlFile,dControlData)
         
         
         

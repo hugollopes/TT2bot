@@ -374,12 +374,33 @@ def getSingleImageTensor(img_size,pixel_depth):
     image = image.reshape((-1, img_size * img_size)).astype(np.float32)
     return image
 
+def savePrediction(filecounts,prediction):
+    i=filecounts[prediction]
+    print("saving file number",i)
+    if prediction==0:
+        path= "goldpet"
+    if prediction==1:
+        path ="nopet"
+    if prediction==2:
+        path ="normalpet"
+    if prediction==3:
+        path ="partialpet"
+    imagefile = "/mnt/pythoncode/detect.png"
+    targetfile = "/mnt/pythoncode/dataforclassifier/TT2predictionsamples/" + path + "/sample"+ str(i) +".png"
+    #print("targetfile",targetfile)
+    shutil.copy(imagefile, targetfile)
+    
+    
+    
+    
+    
+
 import operator
 def getmax(l):
     max_idx, max_val = max(enumerate(l), key=operator.itemgetter(1))
     return max_idx, max_val
 
-def predictpet():
+def predictpet(filecounts):
     _hiddenLayers = [50,20]
     _imageSize = 40
     pixel_depth = 255.0
@@ -402,5 +423,8 @@ def predictpet():
 
     predict_dataset = getSingleImageTensor(_imageSize,pixel_depth)
     predictions = sess.run(finalLayer, feed_dict={tf_image_dataset: predict_dataset})
-    print(getmax(predictions[0]))
-    
+    prediction,max_val = getmax(predictions[0])
+    savePrediction(filecounts,prediction)
+    print("prediction:",prediction)
+    filecounts[prediction] = filecounts[prediction] + 1
+    return prediction,filecounts
