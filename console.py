@@ -1,33 +1,35 @@
+import os
 import pickle
 import sys
-import os
 import time
-from PIL import Image
 
-sys.path.append(os.path.abspath("/mnt/pythoncode"))
+from PIL import Image
+from globals import *
 from train import Processfile, predictpet
 
-#test git integration
+_data_folder, _share_folder ,_pet_prediction_samples_folder, _pet_classified_data_folder, _unclassified_global_captures_folder = set_globals()
+sys.path.append(os.path.abspath("/mnt/pythoncode"))
+
 # this function returns the total increment of classified and unclassified pet pictures
 def getTotalNumberFiles():
-    totalnumber = 0
-    filepaths = ["/mnt/pythoncode/dataforclassifier/TT2predictionsamples/goldpet",
-                 "/mnt/pythoncode/dataforclassifier/TT2predictionsamples/nopet",
-                 "/mnt/pythoncode/dataforclassifier/TT2predictionsamples/normalpet",
-                 "/mnt/pythoncode/dataforclassifier/TT2predictionsamples/partial pet",
-                 "/mnt/pythoncode/dataforclassifier/TT2classified/goldpet",
-                 "/mnt/pythoncode/dataforclassifier/TT2classified/nopet",
-                 "/mnt/pythoncode/dataforclassifier/TT2classified/normalpet",
-                 "/mnt/pythoncode/dataforclassifier/TT2classified/partial pet",
-                 "/mnt/pythoncode/dataforclassifier/unclassified/globalcaptures"]
-    for path in filepaths:
+    total_number = 0
+    file_paths = [_pet_prediction_samples_folder + "/goldpet",
+                  _pet_prediction_samples_folder + "/nopet",
+                  _pet_prediction_samples_folder + "/normalpet",
+                  _pet_prediction_samples_folder + "/partial pet",
+                  _pet_classified_data_folder + "/goldpet",
+                  _pet_classified_data_folder + "/nopet",
+                  _pet_classified_data_folder + "/normalpet",
+                  _pet_classified_data_folder + "/partial pet",
+                  _unclassified_global_captures_folder]
+    for path in file_paths:
         src_files = os.listdir(path)
-        for file_name in src_files:
-            totalnumber += 1
-    return totalnumber
+        for _ in src_files:
+            total_number += 1
+    return total_number
 
-
-def parseRawImage(totalnumber, saveoriginal):
+#create more code modules to hold code.
+def parseRawImage(total_number, saveoriginal):
     start = time.time()
     # test raw reading
     iImgSize = 40
@@ -41,17 +43,15 @@ def parseRawImage(totalnumber, saveoriginal):
     petcrop.save('/mnt/pythoncode/detectResized.png')
     if saveoriginal:
         im.save(
-            "/mnt/pythoncode/dataforclassifier/unclassified/globalcaptures/fullcapture" + str(totalnumber) + " .png")
+            "/mnt/pythoncode/dataforclassifier/unclassified/globalcaptures/fullcapture" + str(total_number) + " .png")
     end = time.time()
     print("captureImage time: ", end - start)
 
 
-totalnumber = getTotalNumberFiles()
-print("there are total ", totalnumber, "files")
+total_number = getTotalNumberFiles()
+print("there are total ", total_number, "files")
 dControlData = {}
 
-# for windows: #strControlFile = "C:\\Users\\TGDLOHU1\\pythoncode\\controlaction.txt"
-# for within docker image
 strControlFile = "/mnt/pythoncode/controlaction.txt"
 
 dControlData = {"Action": "nothing", "AttackNumber": 300}
@@ -60,6 +60,10 @@ sCommands = "(a)ttack,capture,capturepet,(d)etectpet,exit,(cg)captureforgold,pro
 print(sCommands)
 command = ""
 previousCommand = ""
+#todo: decent action pipe between processes.
+#todo: reorganize folder structure and use proper primitives to access files
+#todo: proper global variables handling
+#todo: hold several classifiers.
 while str(command) != 'wow':
 
     if previousCommand == "detectpet":
@@ -85,9 +89,9 @@ while str(command) != 'wow':
             controlFile.close()
 
             time.sleep(2)  # wait for android processing to optaing the raw image
-            parseRawImage(totalnumber, True)
+            parseRawImage(total_number, True)
             time.sleep(0.3)
-            prediction, totalnumber = predictpet(totalnumber)
+            prediction, total_number = predictpet(total_number)
             if prediction == 0:
                 dControlData['Action'] = str("getgold")
                 controlFile = open(strControlFile, "wb")
@@ -102,7 +106,7 @@ while str(command) != 'wow':
     controlFile.close()
     if command == "detectpet":
         time.sleep(5)
-        prediction, totalnumber = predictpet(totalnumber)
+        prediction, total_number = predictpet(total_number)
         if prediction == 0:
             dControlData['Action'] = str("getgold")
             controlFile = open(strControlFile, "wb")
@@ -111,9 +115,3 @@ while str(command) != 'wow':
             print("ready to get gold")
 
     previousCommand = command
-
-
-
-
-
-

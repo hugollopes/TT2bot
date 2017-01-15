@@ -421,7 +421,7 @@ def predictpet(filecounts):
     _hiddenLayers = [200, 30]
     _imageSize = 40
     pixel_depth = 255.0
-    model_file = "/mnt/pythoncode/dataforclassifier/" + 'petdetectionmodel.ckpt.meta'
+    model_file = '/mnt/pythoncode/dataforclassifier/' + 'petdetectionmodel.ckpt.meta'
     sess = tf.Session()
     new_saver = tf.train.import_meta_graph(model_file)
     new_saver.restore(sess, tf.train.latest_checkpoint('/mnt/pythoncode/dataforclassifier/'))

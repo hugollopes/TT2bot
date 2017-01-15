@@ -1,4 +1,3 @@
-import os
 import time
 from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
 import pickle
@@ -8,21 +7,9 @@ imagenumber = 1
 
 def captureImage(imagenumber):
     start = time.time()
-    # tupSquare=(500,500,10,10)
-    # result = device.takeSnapshot()#.getSubImage(tupSquare)
-    # Writes the screenshot to a file
-    # s="C:\Users\TGDLOHU1\Downloads\imagecaptures\shotnm"+str(imagenumber) + ".png"
-    # s2="adb pull /sdcard/foo2.png " + "C:\Users\TGDLOHU1\Downloads\imagecaptures\shot2nm"+str(i) + ".png"
-    # sfile="/sdcard/snapshot/c" + str(i) + ".png
-    sfile = "/sdcard/windows/BstSharedFolder/c" + str(imagenumber) + ".raw"
-    # sshell="screencap -p > " + sfile
-    sshell = "screencap  > " + sfile
+    file = "/sdcard/windows/BstSharedFolder/c" + str(imagenumber) + ".raw"
+    sshell = "screencap  > " + file
     device.shell(sshell)
-    # print sshell
-    # sdir=" C:\\Users\\TGDLOHU1\\Downloads\\imagecaptures\\"
-    # print sdir
-    # spull="adb pull " + sfile + sdir
-    # result.writeToFile(s,'png')
     end = time.time()
     print "captureImage time: ", end - start
     return
@@ -34,13 +21,6 @@ def capturePetMode(imagenumber):
     result = device.takeSnapshot()  # .getSubImage(tupSquare)
     # Writes the screenshot to a file
     s = "C:\Users\TGDLOHU1\Downloads\imagecaptures\checkpet" + str(imagenumber) + ".png"
-    # s2="adb pull /sdcard/foo2.png " + "C:\Users\TGDLOHU1\Downloads\imagecaptures\shot2nm"+str(i) + ".png"
-    # sfile="/sdcard/snapshot/c" + str(i) + ".png"
-    # sshell="screencap -p > " + sfile
-    # print sshell
-    # sdir=" C:\\Users\\TGDLOHU1\\Downloads\\imagecaptures\\"
-    # print sdir
-    # spull="adb pull " + sfile + sdir
     result.writeToFile(s, 'png')
     end = time.time()
     print "captureImage time: ", end - start
@@ -53,13 +33,6 @@ def detectPetMode():
     result = device.takeSnapshot().getSubImage(tupSquare)
     # Writes the screenshot to a file
     s = "C:\Users\TGDLOHU1\pythoncode\detect.png"
-    # s2="adb pull /sdcard/foo2.png " + "C:\Users\TGDLOHU1\Downloads\imagecaptures\shot2nm"+str(i) + ".png"
-    # sfile="/sdcard/snapshot/c" + str(i) + ".png"
-    # sshell="screencap -p > " + sfile
-    # print sshell
-    # sdir=" C:\\Users\\TGDLOHU1\\Downloads\\imagecaptures\\"
-    # print sdir
-    # spull="adb pull " + sfile + sdir
     result.writeToFile(s, 'png')
     end = time.time()
     print "captureImage time: ", end - start
@@ -92,13 +65,7 @@ device = MonkeyRunner.waitForConnection()
 print("connected")
 dControlData = {}
 
-strControlFile = "C:\\Users\\TGDLOHU1\\pythoncode\\controlaction.txt"
-
-# print (oControlData.action)
-# controlFile = open( strControlFile, "wb" )
-# pickle.dump( oControlData, controlFile )
-# controlFile.close()
-
+strControlFile = "C:\\ProgramData\\Bluestacks\\UserData\\SharedFolder\\controlaction.txt"
 
 controlFile = open(strControlFile, "rb")
 dControlData = pickle.load(controlFile)
@@ -144,10 +111,3 @@ while strAction != "Exit":
         MonkeyRunner.sleep(0.03)
         resetfile(strControlFile, dControlData)
 
-
-
-
-
-
-
-# os.system("C:\Users\TGDLOHU1\AppData\Local\Programs\Python\Python35\python C:\Users\TGDLOHU1\Downloads\example2.py")
