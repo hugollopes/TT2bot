@@ -1,13 +1,9 @@
-# import matplotlib.pyplot as plt
 from __future__ import print_function
 import numpy as np
 import os
 import sys
-import tarfile
 from IPython.display import display, Image
 from scipy import ndimage
-from sklearn.linear_model import LogisticRegression
-from six.moves.urllib.request import urlretrieve
 from six.moves import cPickle as pickle
 from PIL import Image
 import tensorflow as tf
@@ -21,7 +17,7 @@ def ensure_dir(d):
 
 
 # check for class folders, and copy data to mirror location.
-def checkFolders(folderPath, folderPathProcessed, preProcess):
+def check_folder(folderPath, folderPathProcessed, preProcess):
     # first delete all preprocessed
     processedFolderlist = os.listdir(folderPathProcessed)
     for f in processedFolderlist:
@@ -371,7 +367,7 @@ def Processfile():
     folderPath = "/mnt/pythoncode/dataforclassifier/TT2classified"
     folderPathProcessed = "/mnt/pythoncode/dataforclassifier/TT2classifiedProcessed"
     print("check and copying data")
-    iNumberClasses, folderList, iNumberImages = checkFolders(folderPath, folderPathProcessed, preProcess)
+    iNumberClasses, folderList, iNumberImages = check_folder(folderPath, folderPathProcessed, preProcess)
     print("Processing ", iNumberClasses, "classe with paths:", folderList)
     # grays and resizes images
     for folder in folderList:
@@ -447,5 +443,5 @@ def predictpet(filecounts):
     prediction, max_val = getmax(predictions[0])
     savePrediction(filecounts, prediction)
     print("prediction:", prediction)
-    filecounts = filecounts + 1
+    filecounts += 1
     return prediction, filecounts
