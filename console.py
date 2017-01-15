@@ -7,11 +7,12 @@ from PIL import Image
 from globals import *
 from train import Processfile, predictpet
 
-_data_folder, _share_folder ,_pet_prediction_samples_folder, _pet_classified_data_folder, _unclassified_global_captures_folder = set_globals()
-sys.path.append(os.path.abspath("/mnt/pythoncode"))
+_data_folder, _share_folder , _code_folder, _pet_prediction_samples_folder, _pet_classified_data_folder, _unclassified_global_captures_folder , _control_file , _raw_full_file = set_globals()
+sys.path.append(os.path.abspath(_code_folder))
+
 
 # this function returns the total increment of classified and unclassified pet pictures
-def getTotalNumberFiles():
+def get_total_number_files():
     total_number = 0
     file_paths = [_pet_prediction_samples_folder + "/goldpet",
                   _pet_prediction_samples_folder + "/nopet",
@@ -29,30 +30,27 @@ def getTotalNumberFiles():
     return total_number
 
 #create more code modules to hold code.
-def parseRawImage(total_number, saveoriginal):
+def parse_raw_image(total_number, saveoriginal):
     start = time.time()
     # test raw reading
     iImgSize = 40
-    with open('/mnt/directShare/c1.raw', 'rb') as f:
+    with open(_raw_full_file, 'rb') as f:
         im = Image.frombytes('RGBA', (1280, 720), f.read())
-    petcrop = im.crop((624, 364, 624 + 110, 364 + 110))
-    petcrop.save('/mnt/pythoncode/detect.png')
-    petcrop = petcrop.convert('L')
+    pet_crop = im.crop((624, 364, 624 + 110, 364 + 110))
+    pet_crop.save(_data_folder + '/detect.png')
+    pet_crop = pet_crop.convert('L')
     imageTuple = (iImgSize, iImgSize)
-    petcrop = petcrop.resize(imageTuple)
-    petcrop.save('/mnt/pythoncode/detectResized.png')
+    pet_crop = pet_crop.resize(imageTuple)
+    pet_crop.save(_data_folder + '/detectResized.png')
     if saveoriginal:
-        im.save(
-            "/mnt/pythoncode/dataforclassifier/unclassified/globalcaptures/fullcapture" + str(total_number) + " .png")
+        im.save(_unclassified_global_captures_folder + "/fullcapture" + str(total_number) + " .png")
     end = time.time()
     print("captureImage time: ", end - start)
 
 
-total_number = getTotalNumberFiles()
+total_number = get_total_number_files()
 print("there are total ", total_number, "files")
 dControlData = {}
-
-strControlFile = "/mnt/pythoncode/controlaction.txt"
 
 dControlData = {"Action": "nothing", "AttackNumber": 300}
 
@@ -61,7 +59,7 @@ print(sCommands)
 command = ""
 previousCommand = ""
 #todo: decent action pipe between processes.
-#todo: reorganize folder structure and use proper primitives to access files
+#todo: use proper primitives to access files
 #todo: proper global variables handling
 #todo: hold several classifiers.
 while str(command) != 'wow':
@@ -84,24 +82,24 @@ while str(command) != 'wow':
         forever = True
         while forever:
             dControlData['Action'] = str("capture")
-            controlFile = open(strControlFile, "wb")
+            controlFile = open(_control_file, "wb")
             pickle.dump(dControlData, controlFile, protocol=2)
             controlFile.close()
 
             time.sleep(2)  # wait for android processing to optaing the raw image
-            parseRawImage(total_number, True)
+            parse_raw_image(total_number, True)
             time.sleep(0.3)
             prediction, total_number = predictpet(total_number)
             if prediction == 0:
                 dControlData['Action'] = str("getgold")
-                controlFile = open(strControlFile, "wb")
+                controlFile = open(_control_file, "wb")
                 pickle.dump(dControlData, controlFile, protocol=2)
                 controlFile.close()
                 print("ready to get gold")
                 time.sleep(1)  # wait for not overwritten
 
     dControlData['Action'] = str(command)
-    controlFile = open(strControlFile, "wb")
+    controlFile = open(_control_file, "wb")
     pickle.dump(dControlData, controlFile, protocol=2)
     controlFile.close()
     if command == "detectpet":
@@ -109,7 +107,7 @@ while str(command) != 'wow':
         prediction, total_number = predictpet(total_number)
         if prediction == 0:
             dControlData['Action'] = str("getgold")
-            controlFile = open(strControlFile, "wb")
+            controlFile = open(_control_file, "wb")
             pickle.dump(dControlData, controlFile, protocol=2)
             controlFile.close()
             print("ready to get gold")

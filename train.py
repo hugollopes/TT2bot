@@ -9,7 +9,10 @@ from PIL import Image
 import tensorflow as tf
 import shutil
 from numpy.ma import sqrt
+from globals import *
 
+
+_data_folder, _share_folder, _code_folder, _pet_prediction_samples_folder, _pet_classified_data_folder, _unclassified_global_captures_folder , _control_file , _raw_full_file = set_globals()
 
 def ensure_dir(d):
     if not os.path.exists(d):
@@ -118,7 +121,7 @@ def readAndPickle(folders, iImgSize, iNumberImages, pixel_depth):
     test_dataset = dataset[start_test_index:end_test_index, :, :]
     test_labels = labels[start_test_index:end_test_index]
 
-    pickle_file = "/mnt/pythoncode/dataforclassifier/" + 'TT2.pickle'
+    pickle_file = _data_folder + "/dataforclassifier/" + 'TT2.pickle'
     try:
         f = open(pickle_file, 'wb')
         save = {
@@ -264,8 +267,8 @@ def generateLossCalc(weights, biases, numHiddenLayers, trainingNetwork, training
 
 
 def trainGraph(image_size, num_labels):
-    pickle_file = "/mnt/pythoncode/dataforclassifier/" + 'TT2.pickle'
-    model_file = "/mnt/pythoncode/dataforclassifier/" + 'petdetectionmodel.ckpt'
+    pickle_file = _data_folder + "/dataforclassifier/" + 'TT2.pickle'
+    model_file = _data_folder + "/dataforclassifier/" + 'petdetectionmodel.ckpt'
     batch_size = 128
     print("image_size ", image_size, "num_labels ", num_labels)
 
@@ -364,8 +367,8 @@ def Processfile():
     preProcess = True  # read again the raw files?
     iImgSize = 40
     pixel_depth = 255.0  # Number of levels per pixel.
-    folderPath = "/mnt/pythoncode/dataforclassifier/TT2classified"
-    folderPathProcessed = "/mnt/pythoncode/dataforclassifier/TT2classifiedProcessed"
+    folderPath = _data_folder + "/dataforclassifier/TT2classified"
+    folderPathProcessed = _data_folder + "/dataforclassifier/TT2classifiedProcessed"
     print("check and copying data")
     iNumberClasses, folderList, iNumberImages = check_folder(folderPath, folderPathProcessed, preProcess)
     print("Processing ", iNumberClasses, "classe with paths:", folderList)
@@ -379,8 +382,8 @@ def Processfile():
 
 # getsingleimage
 def getSingleImageTensor(img_size, pixel_depth):
-    imagefile = "/mnt/pythoncode/detect.png"
-    imagefileResized = "/mnt/pythoncode/detectResized.png"
+    imagefile = _data_folder + "/detect.png"
+    imagefileResized = _data_folder + "/detectResized.png"
     img = Image.open(imagefile).convert('L')
     imageTuple = (img_size, img_size)
     img = img.resize(imageTuple)
@@ -403,8 +406,8 @@ def savePrediction(filecounts, prediction):
         path = "normalpet"
     if prediction == 3:
         path = "partial pet"
-    imagefile = "/mnt/pythoncode/detect.png"
-    targetfile = "/mnt/pythoncode/dataforclassifier/TT2predictionsamples/" + path + "/sample" + str(filecounts) + ".png"
+    imagefile = _data_folder + "/detect.png"
+    targetfile = _data_folder + "/dataforclassifier/TT2predictionsamples/" + path + "/sample" + str(filecounts) + ".png"
     # print("targetfile",targetfile)
     shutil.copy(imagefile, targetfile)
 
@@ -421,10 +424,10 @@ def predictpet(filecounts):
     _hiddenLayers = [200, 30]
     _imageSize = 40
     pixel_depth = 255.0
-    model_file = '/mnt/pythoncode/dataforclassifier/' + 'petdetectionmodel.ckpt.meta'
+    model_file = _data_folder + '/dataforclassifier/' + 'petdetectionmodel.ckpt.meta'
     sess = tf.Session()
     new_saver = tf.train.import_meta_graph(model_file)
-    new_saver.restore(sess, tf.train.latest_checkpoint('/mnt/pythoncode/dataforclassifier/'))
+    new_saver.restore(sess, tf.train.latest_checkpoint(_data_folder + '/dataforclassifier/'))
     all_vars = tf.trainable_variables()
     tf_image_dataset = tf.placeholder(tf.float32, shape=(1, _imageSize * _imageSize))
     h1 = all_vars[0]

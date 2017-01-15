@@ -2,11 +2,17 @@
   <dictionary name="TGDLOHU1">
     <words>
       <w>botdata</w>
+      <w>ckpt</w>
+      <w>controlaction</w>
       <w>dataforclassifier</w>
+      <w>fullcapture</w>
+      <w>globalcaptures</w>
       <w>goldpet</w>
       <w>nopet</w>
       <w>normalpet</w>
+      <w>petdetectionmodel</w>
       <w>predictionsamples</w>
+      <w>pythoncode</w>
     </words>
   </dictionary>
 </component>
