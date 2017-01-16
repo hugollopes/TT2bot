@@ -7,6 +7,8 @@ from PIL import Image
 from train import Processfile, predictpet
 
 
+
+
 # this function returns the total increment of classified and unclassified pet pictures
 def get_total_number_files():
     count_total_number = 0
@@ -44,12 +46,34 @@ def parse_raw_image(total_number, saveoriginal):
     print("captureImage time: ", end - start)
 
 
+def insert_command(_command):
+    try:
+        control_file = open(glo.CONTROL_FILE, "rb")
+        control_data = pickle.load(control_file)
+        control_file.close()
+
+        command_list = control_data["Action"]
+        command_list.insert(0, _command)
+        control_data["Action"] = command_list
+        control_file = open(glo.CONTROL_FILE, "wb")
+        pickle.dump(control_data, control_file, protocol=2)
+        control_file.close()
+    except Exception:
+        print("some error inserting command. action=nothing")
+
+
+def initialize_control_file():
+    action_list = ["nothing"]
+    control_data = {"Action": action_list, "AttackNumber": 300}
+    control_file = open(glo.CONTROL_FILE, "wb")
+    pickle.dump(control_data, control_file, protocol=2)
+    control_file.close()
+    print("file initialized")
+
+initialize_control_file()
+
 total_number = get_total_number_files()
 print("there are total ", total_number, "files")
-dControlData = {}
-
-dControlData = {"Action": "nothing", "AttackNumber": 300}
-
 sCommands = "(a)ttack,capture,capturepet,(d)etectpet,exit,(cg)captureforgold,processfile or ctlr-c':"
 print(sCommands)
 command = ""
@@ -60,13 +84,13 @@ previousCommand = ""
 #todo: hold several classifiers.
 while str(command) != 'wow':
 
-    if previousCommand == "detectpet":
-        time.sleep(5)
-        Command = "detectpet"
-    else:
-        command = raw_input(">")  # for widows, use input.
+    #if previousCommand == "detectpet":
+    #    time.sleep(5)
+    #    Command = "detectpet"
+    #else:
+    #    command = raw_input(">")  # for widows, use input.
     if command == "a":
-        command = "attack"
+        insert_command("attack")
     if command == "processfile":
         Processfile()
         command = previousCommand
@@ -94,10 +118,10 @@ while str(command) != 'wow':
                 print("ready to get gold")
                 time.sleep(1)  # wait for not overwritten
 
-    dControlData['Action'] = str(command)
-    controlFile = open(glo.CONTROL_FILE, "wb")
-    pickle.dump(dControlData, controlFile, protocol=2)
-    controlFile.close()
+    #dControlData['Action'] = str(command)
+    #controlFile = open(glo.CONTROL_FILE, "wb")
+    #pickle.dump(dControlData, controlFile, protocol=2)
+    #controlFile.close()
     if command == "detectpet":
         time.sleep(5)
         prediction, total_number = predictpet(total_number)

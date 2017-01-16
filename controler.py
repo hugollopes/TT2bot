@@ -1,13 +1,17 @@
 import time
+import os
 from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
 import pickle
 
-imagenumber = 1
 
 
-def captureImage(imagenumber):
+
+
+
+
+def captureImage(image_number_count):
     start = time.time()
-    file = "/sdcard/windows/BstSharedFolder/c" + str(imagenumber) + ".raw"
+    file = "/sdcard/windows/BstSharedFolder/c" + str(image_number_count) + ".raw"
     sshell = "screencap  > " + file
     device.shell(sshell)
     end = time.time()
@@ -15,12 +19,12 @@ def captureImage(imagenumber):
     return
 
 
-def capturePetMode(imagenumber):
+def capturePetMode(image_number_count):
     start = time.time()
     # tupSquare=(624,364,110,110)
     result = device.takeSnapshot()  # .getSubImage(tupSquare)
     # Writes the screenshot to a file
-    s = "C:\Users\TGDLOHU1\Downloads\imagecaptures\checkpet" + str(imagenumber) + ".png"
+    s = "C:\Users\TGDLOHU1\Downloads\imagecaptures\checkpet" + str(image_number_count) + ".png"
     result.writeToFile(s, 'png')
     end = time.time()
     print "captureImage time: ", end - start
@@ -52,7 +56,7 @@ def hitautomatically(times):
 def resetfile(strFile, dControlData):
     start = time.time()
     file = open(strFile, "wb")
-    dControlData['Action'] = "nothing"
+    dControlData['Action'] = ["nothing"]
     pickle.dump(dControlData, file, protocol=2)
     file.close()
     end = time.time()
@@ -60,36 +64,49 @@ def resetfile(strFile, dControlData):
     return
 
 
+def read_action(control_file_path):
+    try:
+        control_file = open(control_file_path, "r+")
+        control_data = pickle.load(control_file)
+        control_file.close()
+        command_list = control_data["Action"]
+        #print "control_data",control_data
+        if not command_list:
+            command_list = ["nothing"]
+        action = command_list.pop()
+        control_data["Action"] = command_list
+        #print "control_data", control_data
+        control_file = open(control_file_path, "wb")
+        pickle.dump(control_data, control_file, protocol=2)
+        control_file.close()
+    except Exception:
+        print("some erro reading file. action=nothing" , str(Exception))
+        action = "nothing"
+    return action
+
 print("jPython controler on")
 device = MonkeyRunner.waitForConnection()
 print("connected")
-dControlData = {}
 
+image_number = 1
+dControlData = {"Action":["nothing"],"AttackNumber":300}
 strControlFile = "C:\\ProgramData\\Bluestacks\\UserData\\SharedFolder\\controlaction.txt"
-
-controlFile = open(strControlFile, "rb")
-dControlData = pickle.load(controlFile)
-print (dControlData["Action"])
-controlFile.close()
+resetfile(strControlFile,dControlData)
 
 strAction = "nothing"
 while strAction != "Exit":
-    controlFile = open(strControlFile, "rb")
-    dControlData = pickle.load(controlFile)
-    strAction = dControlData["Action"]
-    controlFile.close()
-    MonkeyRunner.sleep(0.51)
-    # print(charControl)
-    # end = time.time()
-    # print "cycletime: ", end - start
+    MonkeyRunner.sleep(1)
+    strAction = read_action(strControlFile)
+    #if strAction != "nothing":
+    print "action",strAction
     if strAction == "attack":
-        hitautomatically(dControlData["AttackNumber"])
+        hitautomatically(300)
     if strAction == "capture":
         captureImage(1)
         resetfile(strControlFile, dControlData)
     if strAction == "capturepet":
-        capturePetMode(imagenumber)
-        imagenumber += 1
+        capturePetMode(image_number)
+        image_number += 1
     if strAction == "detectpet":
         detectPetMode()
         resetfile(strControlFile, dControlData)
