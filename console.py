@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import pickle
 import sys
@@ -7,7 +8,20 @@ from PIL import Image
 from train import Processfile, predictpet
 
 
+def myfunc(a, b, *args, **kwargs):
+    #c = kwargs.get('c', None)
+    #d = kwargs.get('d', None)
+    if kwargs is not None:
+        for key, value in kwargs.iteritems():
+            print("%s == %s" % (key, value))
+    for ar in args:
+        print(ar)
+        print("here")
+    print("asha")
+   # print(a,b,c,d)
 
+
+myfunc("A", "B","asdasdd", c='nick', d='dog',f="pet",g="goat")
 
 # this function returns the total increment of classified and unclassified pet pictures
 def get_total_number_files():
@@ -69,15 +83,19 @@ def reset_acknowledge():
         print("some error writing acknowledge file")
 
 
-def insert_command(_command):
+def insert_command(_command, **kwargs):
     try:
         control_file = open(glo.CONTROL_FILE, "rb")
         control_data = pickle.load(control_file)
         control_file.close()
-
-        command_list = control_data["Action"]
-        command_list.insert(0, _command)
-        control_data["Action"] = command_list
+        command_list = control_data["ActionList"]
+        action = {"Type": _command}
+        if kwargs is not None:
+            for key, value in kwargs.iteritems():
+                action[key] = value
+                #print("%s == %s" % (key, value))
+        command_list.insert(0, action)
+        control_data["ActionList"] = command_list
         control_file = open(glo.CONTROL_FILE, "wb")
         pickle.dump(control_data, control_file, protocol=2)
         control_file.close()
@@ -86,8 +104,8 @@ def insert_command(_command):
 
 
 def initialize_control_file():
-    action_list = ["nothing"]
-    control_data = {"Action": action_list, "AttackNumber": 300}
+    action_list = [{"Type": "nothing"}]
+    control_data = {"ActionList": action_list}
     control_file = open(glo.CONTROL_FILE, "wb")
     pickle.dump(control_data, control_file, protocol=2)
     control_file.close()
@@ -116,8 +134,8 @@ sCommands = "(a)ttack,capture,exit,(cg)captureforgold,processfile or ctlr-c':"
 print(sCommands)
 command = ""
 previousCommand = ""
-#todo: composed commands like "a 10"
 #todo: hold several classifiers.
+#todo:generic hit command
 while str(command) != 'wow':
 
     command_str = raw_input(">")  # for widows, use input.
@@ -126,6 +144,8 @@ while str(command) != 'wow':
     argv = len(parsed_command)
     if command == "a":
         attack_command(argv, parsed_command)
+    if command == "hit":
+        insert_command("hit", X=parsed_command[1], Y=parsed_command[2])
     if command == "processfile":
         Processfile()
     if command == "capture":

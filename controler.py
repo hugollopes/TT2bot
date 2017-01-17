@@ -19,28 +19,9 @@ def captureImage():
     return
 
 
-def capturePetMode(image_number_count):
-    start = time.time()
-    # tupSquare=(624,364,110,110)
-    result = device.takeSnapshot()  # .getSubImage(tupSquare)
-    # Writes the screenshot to a file
-    s = "C:\Users\TGDLOHU1\Downloads\imagecaptures\checkpet" + str(image_number_count) + ".png"
-    result.writeToFile(s, 'png')
-    end = time.time()
-    print "captureImage time: ", end - start
-    return
-
-
-def detectPetMode():
-    start = time.time()
-    tupSquare = (624, 364, 110, 110)
-    result = device.takeSnapshot().getSubImage(tupSquare)
-    # Writes the screenshot to a file
-    s = "C:\Users\TGDLOHU1\pythoncode\detect.png"
-    result.writeToFile(s, 'png')
-    end = time.time()
-    print "captureImage time: ", end - start
-    return
+def hit(x, y):
+    device.touch(int(x), int(y), MonkeyDevice.DOWN_AND_UP)
+    MonkeyRunner.sleep(0.03)
 
 
 def hitautomatically(times):
@@ -53,10 +34,10 @@ def hitautomatically(times):
     return
 
 
-def resetfile(strFile, dControlData):
+def resetfile(strFile):
     start = time.time()
     file = open(strFile, "wb")
-    dControlData['Action'] = ["nothing"]
+    dControlData = {"ActionList": [{"Type": "nothing"}]}
     pickle.dump(dControlData, file, protocol=2)
     file.close()
     end = time.time()
@@ -76,60 +57,50 @@ def read_action(control_file_path):
         control_file = open(control_file_path, "r+")
         control_data = pickle.load(control_file)
         control_file.close()
-        command_list = control_data["Action"]
+        command_list = control_data["ActionList"]
         #print "control_data",control_data
         if not command_list:
             write_done()
-            command_list = ["nothing"]
+            command_list = [{"Type": "nothing"}]
         action = command_list.pop()
-        control_data["Action"] = command_list
+        control_data["ActionList"] = command_list
         #print "control_data", control_data
         control_file = open(control_file_path, "wb")
         pickle.dump(control_data, control_file, protocol=2)
         control_file.close()
     except Exception:
-        print("some erro reading file. action=nothing" , str(Exception))
-        action = "nothing"
+        print("some erro reading file. action=nothing", str(Exception))
+        action = {"Type": "nothing"}
     return action
 
-print("jPython controler on")
+
+def get_gold():
+    print("getgold")
+    # hit center
+    device.touch(360, 562, MonkeyDevice.DOWN_AND_UP)
+    MonkeyRunner.sleep(0.03)
+    # hit lowered pet
+    device.touch(427, 614, MonkeyDevice.DOWN_AND_UP)
+
+print("jPython controller on")
 device = MonkeyRunner.waitForConnection()
 print("connected")
 
 image_number = 1
-dControlData = {"Action":["nothing"],"AttackNumber":300}
 strControlFile = "C:\\ProgramData\\Bluestacks\\UserData\\SharedFolder\\controlaction.txt"
-resetfile(strControlFile,dControlData)
+resetfile(strControlFile)
 
 strAction = "nothing"
 while strAction != "Exit":
     MonkeyRunner.sleep(0.1)
-    strAction = read_action(strControlFile)
+    action = read_action(strControlFile)
+    strAction = action["Type"]
     if strAction == "attack":
         hitautomatically(300)
     if strAction == "capture":
         captureImage()
-    if strAction == "capturepet":
-        capturePetMode(image_number)
-        image_number += 1
-    if strAction == "detectpet":
-        detectPetMode()
-        resetfile(strControlFile, dControlData)
+    if strAction == "hit":
+        hit(action["X"],action["Y"])
     if strAction == "getgold":
-        print("getgold")
-        # hit center
-        device.touch(360, 562, MonkeyDevice.DOWN_AND_UP)
-        MonkeyRunner.sleep(0.03)
-        device.touch(360, 562, MonkeyDevice.DOWN_AND_UP)
-        MonkeyRunner.sleep(0.03)
-        device.touch(360, 562, MonkeyDevice.DOWN_AND_UP)
-        MonkeyRunner.sleep(0.03)
-        # hit lowered pet
-        device.touch(427, 614, MonkeyDevice.DOWN_AND_UP)
-        MonkeyRunner.sleep(0.03)
-        device.touch(427, 614, MonkeyDevice.DOWN_AND_UP)
-        MonkeyRunner.sleep(0.03)
-        device.touch(427, 614, MonkeyDevice.DOWN_AND_UP)
-        MonkeyRunner.sleep(0.03)
-        resetfile(strControlFile, dControlData)
+        get_gold()
 
