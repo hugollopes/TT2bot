@@ -84,11 +84,11 @@ previousCommand = ""
 #todo: hold several classifiers.
 while str(command) != 'wow':
 
-    #if previousCommand == "detectpet":
-    #    time.sleep(5)
-    #    Command = "detectpet"
-    #else:
-    #    command = raw_input(">")  # for widows, use input.
+    if previousCommand == "detectpet":
+        time.sleep(5)
+        Command = "detectpet"
+    else:
+       command = raw_input(">")  # for widows, use input.
     if command == "a":
         insert_command("attack")
     if command == "processfile":
