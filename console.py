@@ -46,6 +46,29 @@ def parse_raw_image(total_number, saveoriginal):
     print("captureImage time: ", end - start)
 
 
+def wait_acknowledge():
+
+    done = "no"
+    while done == "no":
+        try:
+            control_file = open(glo.ACKNOWLEDGE_FILE, "r+")
+            control_data = pickle.load(control_file)
+            control_file.close()
+            done = control_data["Done"]
+        except Exception:
+            print("error waiting acknowledgment")
+
+
+def reset_acknowledge():
+    try:
+        control_data = {"Done": "no"}
+        control_file = open(glo.ACKNOWLEDGE_FILE, "wb")
+        pickle.dump(control_data, control_file, protocol=2)
+        control_file.close()
+    except Exception:
+        print("some error writing acknowledge file")
+
+
 def insert_command(_command):
     try:
         control_file = open(glo.CONTROL_FILE, "rb")
@@ -70,66 +93,53 @@ def initialize_control_file():
     control_file.close()
     print("file initialized")
 
+
+def attack_command(_argv, _parsed_command):
+    if _argv == 2:
+        attack_times = int(_parsed_command[1])
+        for num in range(0, attack_times):
+            insert_command("attack")
+    else:
+        insert_command("attack")
+    reset_acknowledge()
+    wait_acknowledge()
+    print("command processed")
+
+
+
+
 initialize_control_file()
 
 total_number = get_total_number_files()
 print("there are total ", total_number, "files")
-sCommands = "(a)ttack,capture,capturepet,(d)etectpet,exit,(cg)captureforgold,processfile or ctlr-c':"
+sCommands = "(a)ttack,capture,exit,(cg)captureforgold,processfile or ctlr-c':"
 print(sCommands)
 command = ""
 previousCommand = ""
-#todo: decent action pipe between processes.
-#todo: use proper primitives to access files
-#todo: proper global variables handling
+#todo: composed commands like "a 10"
 #todo: hold several classifiers.
 while str(command) != 'wow':
 
-    if previousCommand == "detectpet":
-        time.sleep(5)
-        Command = "detectpet"
-    else:
-       command = raw_input(">")  # for widows, use input.
+    command_str = raw_input(">")  # for widows, use input.
+    parsed_command = str.split(command_str)
+    command = parsed_command[0]
+    argv = len(parsed_command)
     if command == "a":
-        insert_command("attack")
+        attack_command(argv, parsed_command)
     if command == "processfile":
         Processfile()
-        command = previousCommand
-    if command == "detectpet" or command == "d":
-        command = "detectpet"
-    if command == "getgold" or command == "g":
-        pass
+    if command == "capture":
+        insert_command("capture")
+        reset_acknowledge()
+        wait_acknowledge()
     if command == "captureforgold" or command == "cg":
-        forever = True
-        while forever:
-            dControlData['Action'] = str("capture")
-            controlFile = open(glo.CONTROL_FILE, "wb")
-            pickle.dump(dControlData, controlFile, protocol=2)
-            controlFile.close()
-
-            time.sleep(2)  # wait for android processing to optaing the raw image
-            parse_raw_image(total_number, True)
-            time.sleep(0.3)
-            prediction, total_number = predictpet(total_number)
-            if prediction == 0:
-                dControlData['Action'] = str("getgold")
-                controlFile = open(glo.CONTROL_FILE, "wb")
-                pickle.dump(dControlData, controlFile, protocol=2)
-                controlFile.close()
-                print("ready to get gold")
-                time.sleep(1)  # wait for not overwritten
-
-    #dControlData['Action'] = str(command)
-    #controlFile = open(glo.CONTROL_FILE, "wb")
-    #pickle.dump(dControlData, controlFile, protocol=2)
-    #controlFile.close()
-    if command == "detectpet":
-        time.sleep(5)
+        insert_command("capture")
+        reset_acknowledge()
+        wait_acknowledge()
+        parse_raw_image(total_number, True)
         prediction, total_number = predictpet(total_number)
         if prediction == 0:
-            dControlData['Action'] = str("getgold")
-            controlFile = open(glo.CONTROL_FILE, "wb")
-            pickle.dump(dControlData, controlFile, protocol=2)
-            controlFile.close()
+            insert_command("getgold")
             print("ready to get gold")
 
     previousCommand = command

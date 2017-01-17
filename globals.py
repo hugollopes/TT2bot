@@ -5,4 +5,5 @@ PET_PREDICTION_SAMPLES_FOLDER = DATA_FOLDER + "/dataforclassifier/TT2predictions
 PET_CLASSIFIED_DATA_FOLDER = DATA_FOLDER + "/dataforclassifier/TT2classified"
 UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER = DATA_FOLDER + "/dataforclassifier/unclassified/globalcaptures"
 CONTROL_FILE = SHARE_FOLDER + "/controlaction.txt"
+ACKNOWLEDGE_FILE = SHARE_FOLDER + "/ackaction.txt"
 RAW_FULL_FILE = SHARE_FOLDER + "/c1.raw"

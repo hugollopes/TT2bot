@@ -9,9 +9,9 @@ import pickle
 
 
 
-def captureImage(image_number_count):
+def captureImage():
     start = time.time()
-    file = "/sdcard/windows/BstSharedFolder/c" + str(image_number_count) + ".raw"
+    file = "/sdcard/windows/BstSharedFolder/c1.raw"
     sshell = "screencap  > " + file
     device.shell(sshell)
     end = time.time()
@@ -64,6 +64,13 @@ def resetfile(strFile, dControlData):
     return
 
 
+def write_done():
+    acknowledge_file = "C:\\ProgramData\\Bluestacks\\UserData\\SharedFolder\\ackaction.txt"
+    control_file = open(acknowledge_file, "wb")
+    control_data = {"Done": "yes"}
+    pickle.dump(control_data, control_file, protocol=2)
+    control_file.close()
+
 def read_action(control_file_path):
     try:
         control_file = open(control_file_path, "r+")
@@ -72,6 +79,7 @@ def read_action(control_file_path):
         command_list = control_data["Action"]
         #print "control_data",control_data
         if not command_list:
+            write_done()
             command_list = ["nothing"]
         action = command_list.pop()
         control_data["Action"] = command_list
@@ -95,15 +103,12 @@ resetfile(strControlFile,dControlData)
 
 strAction = "nothing"
 while strAction != "Exit":
-    MonkeyRunner.sleep(1)
+    MonkeyRunner.sleep(0.1)
     strAction = read_action(strControlFile)
-    #if strAction != "nothing":
-    print "action",strAction
     if strAction == "attack":
         hitautomatically(300)
     if strAction == "capture":
-        captureImage(1)
-        resetfile(strControlFile, dControlData)
+        captureImage()
     if strAction == "capturepet":
         capturePetMode(image_number)
         image_number += 1
