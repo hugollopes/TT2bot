@@ -135,7 +135,16 @@ print(sCommands)
 command = ""
 previousCommand = ""
 #todo: hold several classifiers.
-#todo:generic hit command
+#todo:generic drag command
+#todo: regonize boss mode
+#todo: recognize level number
+#todo:  recognize active tabs
+#todo: recognize heroes position
+#todo: reconize heroes data
+#todo: increment hero
+#todo: store list of actions
+#todo: ml on actions
+
 while str(command) != 'wow':
 
     command_str = raw_input(">")  # for widows, use input.
@@ -146,6 +155,8 @@ while str(command) != 'wow':
         attack_command(argv, parsed_command)
     if command == "hit":
         insert_command("hit", X=parsed_command[1], Y=parsed_command[2])
+        reset_acknowledge()
+        wait_acknowledge()
     if command == "processfile":
         Processfile()
     if command == "capture":

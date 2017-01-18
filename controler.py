@@ -22,6 +22,7 @@ def captureImage():
 def hit(x, y):
     device.touch(int(x), int(y), MonkeyDevice.DOWN_AND_UP)
     MonkeyRunner.sleep(0.03)
+    print("hit x", x, " y ", y)
 
 
 def hitautomatically(times):
