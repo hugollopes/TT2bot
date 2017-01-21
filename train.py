@@ -64,7 +64,6 @@ def resizeFolderImages(folderPath, iImgSize, preProcess):
             img = img.resize(imageTuple)
             img.save(imageFile)
 
-
 def make_arrays(nb_rows, img_size):
     if nb_rows:
         dataset = np.ndarray((nb_rows, img_size, img_size), dtype=np.float32)
@@ -79,6 +78,8 @@ def randomize(dataset, labels):
     shuffled_dataset = dataset[permutation, :, :]
     shuffled_labels = labels[permutation]
     return shuffled_dataset, shuffled_labels
+
+
 
 
 def readAndPickle(folders, iImgSize, iNumberImages, pixel_depth):

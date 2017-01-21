@@ -7,6 +7,7 @@
       <w>ckpt</w>
       <w>controlaction</w>
       <w>dataforclassifier</w>
+      <w>dataset</w>
       <w>fullcapture</w>
       <w>getgold</w>
       <w>globalcaptures</w>
@@ -17,6 +18,7 @@
       <w>pred</w>
       <w>predictionsamples</w>
       <w>pythoncode</w>
+      <w>resized</w>
       <w>resizes</w>
       <w>tbot</w>
     </words>
