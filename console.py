@@ -7,22 +7,6 @@ import globals as glo
 from PIL import Image
 from train import Processfile, predictpet
 
-
-def myfunc(a, b, *args, **kwargs):
-    #c = kwargs.get('c', None)
-    #d = kwargs.get('d', None)
-    if kwargs is not None:
-        for key, value in kwargs.iteritems():
-            print("%s == %s" % (key, value))
-    for ar in args:
-        print(ar)
-        print("here")
-    print("asha")
-   # print(a,b,c,d)
-
-
-myfunc("A", "B","asdasdd", c='nick', d='dog',f="pet",g="goat")
-
 # this function returns the total increment of classified and unclassified pet pictures
 def get_total_number_files():
     count_total_number = 0

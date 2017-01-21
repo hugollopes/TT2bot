@@ -28,7 +28,12 @@ def hit(x, y):
 def hitautomatically(times):
     start = time.time()
     for i in range(1, times + 1):
-        device.touch(350, 500, MonkeyDevice.DOWN_AND_UP)
+        try:
+            device.touch(350, 500, MonkeyDevice.DOWN_AND_UP)
+        except Exception:
+            print("reconnecting")
+            global device
+            device = MonkeyRunner.waitForConnection()
         MonkeyRunner.sleep(0.03)
     end = time.time()
     print "hitautomaticallytime: ", end - start
@@ -101,7 +106,7 @@ while strAction != "Exit":
     if strAction == "capture":
         captureImage()
     if strAction == "hit":
-        hit(action["X"],action["Y"])
+        hit(action["X"], action["Y"])
     if strAction == "getgold":
         get_gold()
 
