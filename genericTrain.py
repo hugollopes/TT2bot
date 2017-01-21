@@ -59,6 +59,10 @@ class TrainerPredictor:
             if not os.path.exists(folder):
                 os.makedirs(folder)
                 print("creating directory", folder)
+        #
+        # important files
+        #
+        self.pickle_processed_images_file = self.base_folder + "/processed_images.pickle"
 
     def crop_images(self):
         """ this function reads raw files, crops images, and places them in the unclassified folder"""
@@ -71,14 +75,25 @@ class TrainerPredictor:
                       + '.png')
             TrainerPredictor.images_count += 1
 
-
     def process_images(self):
-        """this method reads from the classified folder, grays abd resizes, and places in the processed folder"""
+        """this method deletes the processed folder,
+        reads from the classified folder, grays abd resizes, and places in the processed folder"""
+        #
+        # first delete all processed
+        #
+        for classification in self.pred_classes:
+            image_files = os.listdir(self.classified_processed + "/" + classification)
+            for image_file in image_files:
+                os.remove(self.classified_processed + "/" + classification + '/' + image_file)
+        print("finish removing files")
+        #
+        # gray and resize and save in the processed.
+        #
         for classification in self.pred_classes:
             image_files = os.listdir(self.classified_folder + "/" + classification)
             for image_file in image_files:
                 image = Image.open(self.classified_folder + "/" + classification + '/' + image_file)
-                image = image.convert('L')#
+                image = image.convert('L')
                 image_tuple = (self.size_x, self.size_y)
                 image = image.resize(image_tuple)
                 image.save(self.classified_processed + "/" + classification + '/sample'
@@ -87,48 +102,43 @@ class TrainerPredictor:
                 TrainerPredictor.images_count += 1
                 self.num_images += 1
 
-    def read_and_pickle(self):#folders, iImgSize, iNumberImages, pixel_depth):
+    def read_and_pickle(self):
         """reads grayed and resized image and creates pickled array of data"""
-        dataset, labels = make_arrays(self.num_images,self.size_x,self.size_y)
+        dataset, labels = make_arrays(self.num_images, self.size_y, self.size_x)
         label_class = 0
         image_index = 0
         #
-        # cycle in for all imager
+        # cycle in for all processed classified images
         #
         for classification in self.pred_classes:
             image_files = os.listdir(self.classified_processed + "/" + classification)
             for image_file in image_files:
                 image_file_path = self.classified_processed + "/" + classification + "/" + image_file
-                dataset[image_index, :, :] = (ndimage.imread(image_file_path).astype(float) -
-                                             pixel_depth / 2) / pixel_depth
-        class_folders = os.listdir(folders)
+                dataset[image_index, :, :] = (ndimage.imread(image_file_path).astype(float)
+                                              - self.pixel_depth / 2) / self.pixel_depth
+                labels[image_index] = label_class
+                image_index += 1
+            label_class += 1
 
-        for classfolder in classFolders:
-            images = os.listdir(folders + "/" + classfolder)
-            for image in images:
-                imagefile = folders + "/" + classfolder + "/" + image
-                dataset[imageIndex, :, :] = (ndimage.imread(imagefile).astype(float) -
-                                             pixel_depth / 2) / pixel_depth
-                labels[imageIndex] = labelClass
-                imageIndex += 1
-            labelClass += 1
         dataset, labels = randomize(dataset, labels)
         # print("dataset shape:",dataset.shape,"dataset data",dataset)
         # print("labels shape:",labels.shape,"labels data",labels)
         # separate for train/test/validation
-        sizeTrain = int(iNumberImages * 0.6)
-        sizeTestVal = int(iNumberImages * 0.2)
-        end_train_index = sizeTrain
+        size_train = int(self.num_images * 0.6)
+        size_test_val = int(self.num_images * 0.2)
+        end_train_index = size_train
         start_valid_index = end_train_index + 1
-        end_valid_index = start_valid_index + sizeTestVal
+        end_valid_index = start_valid_index + size_test_val
         start_test_index = end_valid_index + 1
-        end_test_index = start_test_index + sizeTestVal
+        end_test_index = start_test_index + size_test_val
+
         print("end_train_index: ", end_train_index, " end_valid_index: ", end_valid_index, " end_test_index: ",
               end_test_index)
 
-        train_dataset, train_labels = make_arrays(sizeTrain, iImgSize)
-        valid_dataset, valid_labels = make_arrays(sizeTestVal, iImgSize)
-        test_dataset, test_labels = make_arrays(sizeTestVal, iImgSize)
+        #train_dataset, train_labels = make_arrays(size_train, self.size_x, self.size_y)
+        #valid_dataset, valid_labels = make_arrays(size_test_val,self.size_x, self.size_y)
+        #test_dataset, test_labels = make_arrays(size_test_val, self.size_x, self.size_y)
+
         train_dataset = dataset[0:end_train_index, :, :]
         train_labels = labels[0:end_train_index]
         valid_dataset = dataset[start_valid_index:end_valid_index, :, :]
@@ -136,27 +146,21 @@ class TrainerPredictor:
         test_dataset = dataset[start_test_index:end_test_index, :, :]
         test_labels = labels[start_test_index:end_test_index]
 
-        pickle_file = glo.DATA_FOLDER + "/dataforclassifier/" + 'TT2.pickle'
-        try:
-            f = open(pickle_file, 'wb')
-            save = {
-                'train_dataset': train_dataset,
-                'train_labels': train_labels,
-                'valid_dataset': valid_dataset,
-                'valid_labels': valid_labels,
-                'test_dataset': test_dataset,
-                'test_labels': test_labels,
-            }
-            print("save:", save)
-            pickle.dump(save, f, pickle.HIGHEST_PROTOCOL)
-            f.close()
-        except Exception as e:
-            print('Unable to save data to', pickle_file, ':', e)
-            raise
+        save = {
+            'train_dataset': train_dataset,
+            'train_labels': train_labels,
+            'valid_dataset': valid_dataset,
+            'valid_labels': valid_labels,
+            'test_dataset': test_dataset,
+            'test_labels': test_labels,
+        }
+
+        save_pickle(self.pickle_processed_images_file, save)
+
 
 boss_trainer = TrainerPredictor("boss_active_predictor", ["boss_active", "boss_inactive", "no_boss"]
                                 , (1224, 555, 1248, 648)
-                                , 12, 46 , 255.0)
+                                , 12, 46, 255.0)
 egg_trainer = TrainerPredictor("egg_active_predictor", ["egg_active", "egg_inactive"]
                                , (741, 31, 761, 64)
                                , 10, 16, 255.0)
@@ -165,7 +169,8 @@ trainers_predictors_list.append(boss_trainer)
 trainers_predictors_list.append(egg_trainer)
 for trainer in trainers_predictors_list:
 #    trainer.crop_images()
- #   trainer.process_images()
+    trainer.process_images()
+    trainer.read_and_pickle()
 
 
 
