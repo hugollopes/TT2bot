@@ -329,13 +329,19 @@ class TT2Predictor:
                                        , (741, 31, 761, 64)
                                        , 10, 16, 255.0
                                        , [200, 30])
+        gold_pet_trainer = TrainerPredictor("gold_pet_predictor", ["goldpet", "nopet", "normalpet", "partial pet"]
+                                            , (624, 364, 734, 474)
+                                            , 40, 40, 255.0
+                                            , [200, 30])
         self.trainers_predictors_list.append(boss_trainer)
         self.trainers_predictors_list.append(egg_trainer)
+        self.trainers_predictors_list.append(gold_pet_trainer)
         for trainer in self.trainers_predictors_list:
-        #    trainer.crop_images()
+            pass
+            #trainer.crop_images()
             trainer.process_images()
-            #trainer.read_and_pickle()
-            #trainer.train_graph()
+            trainer.read_and_pickle()
+            trainer.train_graph()
         saved_classes_file = glo.DATA_FOLDER + "/dataforclassifier/TrainerPredictor_list.pickle"
         save_pickle(saved_classes_file, self.trainers_predictors_list)
 
@@ -352,8 +358,10 @@ class TT2Predictor:
     def predict_parsed_all(self):
         pred_dict = {}
         for class_predictor in self.trainers_predictors_list:
-            pred_dict[class_predictor.name ] = class_predictor.predict_parsed()
+            pred_dict[class_predictor.name] = class_predictor.predict_parsed()
         return pred_dict
+
+
 
 """
 predictor = TT2Predictor()

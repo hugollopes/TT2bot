@@ -115,6 +115,8 @@ initialize_control_file()
 total_number = get_total_number_files()
 print("there are total ", total_number, "files")
 
+#todo: cleanup pet detector
+#todo: dynamic prediction hidden layer configuration
 #todo:generic drag command
 #todo: recognize level number
 #todo:  recognize active tabs
