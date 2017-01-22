@@ -3,19 +3,13 @@ from __future__ import print_function
 import os
 import globals as glo
 import time
-import datetime
 import tensorflow as tf
 from PIL import Image
 from TFFunctions import *
 from scipy import ndimage
 import shutil
-import sys
-"""from IPython.display import display, Image
-from scipy import ndimage
-from six.moves import cPickle as pickle
-import tensorflow as tf
-import shutil
-from numpy.ma import sqrt"""
+
+
 
 #
 # goal of this module is to implement generic training/ predictor objects
@@ -339,9 +333,9 @@ class TT2Predictor:
         for trainer in self.trainers_predictors_list:
             pass
             #trainer.crop_images()
-            trainer.process_images()
-            trainer.read_and_pickle()
-            trainer.train_graph()
+            #trainer.process_images()
+            #trainer.read_and_pickle()
+            #trainer.train_graph()
         saved_classes_file = glo.DATA_FOLDER + "/dataforclassifier/TrainerPredictor_list.pickle"
         save_pickle(saved_classes_file, self.trainers_predictors_list)
 

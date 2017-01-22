@@ -5,9 +5,11 @@ import sys
 import time
 import globals as glo
 from PIL import Image
-from train import Processfile, predictpet
+#from train import Processfile, predictpet
 from genericTrain import TT2Predictor
+from TT2actions import *
 
+"""
 # this function returns the total increment of classified and unclassified pet pictures
 def get_total_number_files():
     count_total_number = 0
@@ -25,67 +27,8 @@ def get_total_number_files():
         for _ in src_files:
             count_total_number += 1
     return count_total_number
+"""
 
-#create more code modules to hold code.
-def parse_raw_image(total_number, saveoriginal):
-    start = time.time()
-    # test raw reading
-    iImgSize = 40
-    with open(glo.RAW_FULL_FILE, 'rb') as f:
-        im = Image.frombytes('RGBA', (1280, 720), f.read())
-    pet_crop = im.crop((624, 364, 624 + 110, 364 + 110))
-    pet_crop.save(glo.DATA_FOLDER + '/detect.png')
-    pet_crop = pet_crop.convert('L')
-    imageTuple = (iImgSize, iImgSize)
-    pet_crop = pet_crop.resize(imageTuple)
-    pet_crop.save(glo.DATA_FOLDER + '/detectResized.png')
-    if saveoriginal:
-        im.save(glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + "/fullcapture" + str(total_number) + " .png")
-    end = time.time()
-    print("captureImage time: ", end - start)
-
-
-def wait_acknowledge():
-
-    done = "no"
-    while done == "no":
-        try:
-            control_file = open(glo.ACKNOWLEDGE_FILE, "r+")
-            control_data = pickle.load(control_file)
-            control_file.close()
-            done = control_data["Done"]
-        except Exception:
-            print("error waiting acknowledgment")
-
-
-def reset_acknowledge():
-    try:
-        control_data = {"Done": "no"}
-        control_file = open(glo.ACKNOWLEDGE_FILE, "wb")
-        pickle.dump(control_data, control_file, protocol=2)
-        control_file.close()
-    except Exception:
-        print("some error writing acknowledge file")
-
-
-def insert_command(_command, **kwargs):
-    try:
-        control_file = open(glo.CONTROL_FILE, "rb")
-        control_data = pickle.load(control_file)
-        control_file.close()
-        command_list = control_data["ActionList"]
-        action = {"Type": _command}
-        if kwargs is not None:
-            for key, value in kwargs.iteritems():
-                action[key] = value
-                #print("%s == %s" % (key, value))
-        command_list.insert(0, action)
-        control_data["ActionList"] = command_list
-        control_file = open(glo.CONTROL_FILE, "wb")
-        pickle.dump(control_data, control_file, protocol=2)
-        control_file.close()
-    except Exception:
-        print("some error inserting command. action=nothing")
 
 
 def initialize_control_file():
@@ -112,10 +55,12 @@ predictor = TT2Predictor()
 
 initialize_control_file()
 
-total_number = get_total_number_files()
-print("there are total ", total_number, "files")
+#total_number = get_total_number_files()
+#print("there are total ", total_number, "files")
 
-#todo: cleanup pet detector
+
+
+
 #todo: dynamic prediction hidden layer configuration
 #todo:generic drag command
 #todo: recognize level number
@@ -125,6 +70,7 @@ print("there are total ", total_number, "files")
 #todo: increment hero
 #todo: store list of actions
 #todo: ml on actions
+
 
 sCommands = "(a)ttack,capture,exit,(cg)captureforgold,processfile,(r)ecognize or ctlr-c':"
 print(sCommands)
@@ -142,8 +88,8 @@ while str(command) != 'wow':
         insert_command("hit", X=parsed_command[1], Y=parsed_command[2])
         reset_acknowledge()
         wait_acknowledge()
-    if command == "processfile":
-        Processfile()
+    #if command == "processfile":
+    #    Processfile()
     if command == "capture":
         insert_command("capture")
         reset_acknowledge()
@@ -156,17 +102,21 @@ while str(command) != 'wow':
         pred_dict = predictor.predict_parsed_all()
         if int(pred_dict['egg_active_predictor']) == 0:
             print("capturing egg")
-            insert_command("hit", X=50, Y=525) #hit egg
+            insert_command("hit", X=glo.HIT_DICT["egg"][0], Y=glo.HIT_DICT["egg"][1])
             time.sleep(0.5)
-            insert_command("hit", X=370, Y=355) #hit shining egg
+            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1])
+            time.sleep(0.5)
+            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1])
+            time.sleep(1)
+            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1]) #one more hit to clear
     if command == "captureforgold" or command == "cg":
         insert_command("capture")
         reset_acknowledge()
         wait_acknowledge()
-        parse_raw_image(total_number, True)
-        prediction, total_number = predictpet(total_number)
-        if prediction == 0:
-            insert_command("getgold")
+        predictor.parse_raw_image()
+        pred_dict = predictor.predict_parsed_all()
+        if int(pred_dict['gold_pet_predictor']) == 0:
+            insert_command("getgold") #todo: remove gold for generic hit.
             print("ready to get gold")
 
     previousCommand = command

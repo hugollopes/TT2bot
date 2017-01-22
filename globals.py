@@ -7,3 +7,6 @@ UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER = DATA_FOLDER + "/dataforclassifier/unclassi
 CONTROL_FILE = SHARE_FOLDER + "/controlaction.txt"
 ACKNOWLEDGE_FILE = SHARE_FOLDER + "/ackaction.txt"
 RAW_FULL_FILE = SHARE_FOLDER + "/c1.raw"
+HIT_DICT = {"egg": (50, 525),
+            "Shinning_egg": (370, 355),
+            "boss_toggle": (605, 49)}
