@@ -9,4 +9,6 @@ ACKNOWLEDGE_FILE = SHARE_FOLDER + "/ackaction.txt"
 RAW_FULL_FILE = SHARE_FOLDER + "/c1.raw"
 HIT_DICT = {"egg": (50, 525),
             "Shinning_egg": (370, 355),
-            "boss_toggle": (605, 49)}
+            "boss_toggle": (605, 49),
+            "pet_gold_hit_center": (360, 562),
+            "pet_gold_hit_normal": (427, 614)}

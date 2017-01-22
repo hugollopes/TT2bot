@@ -109,14 +109,8 @@ while str(command) != 'wow':
             insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1])
             time.sleep(1)
             insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1]) #one more hit to clear
+            time.sleep(1)
+            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1])  # one more hit to clear
     if command == "captureforgold" or command == "cg":
-        insert_command("capture")
-        reset_acknowledge()
-        wait_acknowledge()
-        predictor.parse_raw_image()
-        pred_dict = predictor.predict_parsed_all()
-        if int(pred_dict['gold_pet_predictor']) == 0:
-            insert_command("getgold") #todo: remove gold for generic hit.
-            print("ready to get gold")
-
+        capture_gold_forever(predictor)
     previousCommand = command

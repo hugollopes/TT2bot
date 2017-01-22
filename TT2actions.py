@@ -12,17 +12,22 @@ def capture_gold_forever(predictor):
         pred_dict = predictor.predict_parsed_all()
         if int(pred_dict['gold_pet_predictor']) == 0:
             if int(pred_dict['boss_active_predictor']) == 1:
-                insert_command("hit", X=glo.HIT_DICT["boss_toggle"][0], Y=glo.HIT_DICT["boss_toggle"][1])
+                insert_command("hit", hit_pos="boss_toggle")
+                #insert_command("hit", X=glo.HIT_DICT["boss_toggle"][0], Y=glo.HIT_DICT["boss_toggle"][1])
                 print("ready to get gold with boss")
                 time.sleep(0.5)
-                insert_command("getgold")  # todo: remove gold for generic hit.
+                insert_command("hit", hit_pos="pet_gold_hit_center")
+                insert_command("hit", hit_pos="pet_gold_hit_normal")
+                #insert_command("getgold")  # todo: remove gold for generic hit.
                 reset_acknowledge()
                 wait_acknowledge()
                 time.sleep(0.5)
             else:
-                insert_command("getgold")  # todo: remove gold for generic hit.
-                print("ready to get gold")
+                #insert_command("getgold")  # todo: remove gold for generic hit.
                 reset_acknowledge()
+                insert_command("hit", hit_pos="pet_gold_hit_center")
+                insert_command("hit", hit_pos="pet_gold_hit_normal")
+                print("ready to get gold")
                 wait_acknowledge()
 
 
@@ -58,8 +63,12 @@ def insert_command(_command, **kwargs):
         action = {"Type": _command}
         if kwargs is not None:
             for key, value in kwargs.iteritems():
-                action[key] = value
-                # print("%s == %s" % (key, value))
+                if key == "hit_pos":
+                    action["X"] = glo.HIT_DICT[value][0]
+                    action["Y"] = glo.HIT_DICT[value][1]
+                else:
+                    action[key] = value
+                    # print("%s == %s" % (key, value))
         command_list.insert(0, action)
         control_data["ActionList"] = command_list
         control_file = open(glo.CONTROL_FILE, "wb")
