@@ -12,6 +12,7 @@
       <w>getgold</w>
       <w>globalcaptures</w>
       <w>goldpet</w>
+      <w>minibatch</w>
       <w>nopet</w>
       <w>normalpet</w>
       <w>petdetectionmodel</w>
@@ -20,6 +21,7 @@
       <w>pythoncode</w>
       <w>resized</w>
       <w>resizes</w>
+      <w>rgba</w>
       <w>tbot</w>
     </words>
   </dictionary>

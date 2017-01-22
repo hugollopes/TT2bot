@@ -10,6 +10,7 @@ from six.moves import cPickle as pickle
 from PIL import Image
 import tensorflow as tf
 import shutil
+import operator
 from numpy.ma import sqrt
 
 
@@ -412,7 +413,7 @@ def savePrediction(filecounts, prediction):
     shutil.copy(imagefile, targetfile)
 
 
-import operator
+
 
 
 def getmax(l):

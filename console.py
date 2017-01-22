@@ -6,6 +6,7 @@ import time
 import globals as glo
 from PIL import Image
 from train import Processfile, predictpet
+from genericTrain import TT2Predictor
 
 # this function returns the total increment of classified and unclassified pet pictures
 def get_total_number_files():
@@ -107,20 +108,14 @@ def attack_command(_argv, _parsed_command):
     wait_acknowledge()
     print("command processed")
 
-
-
+predictor = TT2Predictor()
 
 initialize_control_file()
 
 total_number = get_total_number_files()
 print("there are total ", total_number, "files")
-sCommands = "(a)ttack,capture,exit,(cg)captureforgold,processfile or ctlr-c':"
-print(sCommands)
-command = ""
-previousCommand = ""
-#todo: hold several classifiers.
+
 #todo:generic drag command
-#todo: regonize boss mode
 #todo: recognize level number
 #todo:  recognize active tabs
 #todo: recognize heroes position
@@ -129,6 +124,10 @@ previousCommand = ""
 #todo: store list of actions
 #todo: ml on actions
 
+sCommands = "(a)ttack,capture,exit,(cg)captureforgold,processfile,(r)ecognize or ctlr-c':"
+print(sCommands)
+command = ""
+previousCommand = ""
 while str(command) != 'wow':
 
     command_str = raw_input(">")  # for widows, use input.
@@ -147,6 +146,17 @@ while str(command) != 'wow':
         insert_command("capture")
         reset_acknowledge()
         wait_acknowledge()
+    if command == "recognize" or command == "r":
+        reset_acknowledge()
+        insert_command("capture")
+        wait_acknowledge()
+        predictor.parse_raw_image()
+        pred_dict = predictor.predict_parsed_all()
+        if int(pred_dict['egg_active_predictor']) == 0:
+            print("capturing egg")
+            insert_command("hit", X=50, Y=525) #hit egg
+            time.sleep(0.5)
+            insert_command("hit", X=370, Y=355) #hit shining egg
     if command == "captureforgold" or command == "cg":
         insert_command("capture")
         reset_acknowledge()
