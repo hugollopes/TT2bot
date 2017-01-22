@@ -85,20 +85,7 @@ while str(command) != 'wow':
         insert_command("capture")
         acknowledge()
     if command == "recognize" or command == "r":
-        insert_command("capture")
-        acknowledge()
-        pred_dict = predictor.predict()
-        if int(pred_dict['egg_active_predictor']) == 0:
-            print("capturing egg")
-            insert_command("hit", hit_pos="egg")
-            time.sleep(0.5)
-            insert_command("hit", hit_pos="Shinning_egg")
-            time.sleep(0.5)
-            insert_command("hit", hit_pos="Shinning_egg")
-            time.sleep(1)
-            insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
-            time.sleep(1)
-            insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
+        recognize_and_get_egg(predictor)
     if command == "captureforgold" or command == "cg":
         capture_gold_forever(predictor)
     if command == "drag":

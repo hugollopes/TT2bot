@@ -24,6 +24,24 @@ def capture_gold_forever(predictor):
             upgrade_heroes()
 
 
+def recognize_and_get_egg(predictor):
+    insert_command("capture")
+    acknowledge()
+    pred_dict = predictor.predict()
+    if int(pred_dict['egg_active_predictor']) == 0:
+        print("capturing egg")
+        insert_command("hit", hit_pos="egg")
+        time.sleep(0.5)
+        insert_command("hit", hit_pos="Shinning_egg")
+        time.sleep(0.5)
+        insert_command("hit", hit_pos="Shinning_egg")
+        time.sleep(1)
+        insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
+        time.sleep(1)
+        insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
+        acknowledge()
+
+
 def upgrade_heroes():
     #insert_command("hit", hit_pos="heroes_tab") #must assume it is in the hero tab
     insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
