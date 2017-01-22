@@ -24,6 +24,11 @@ def hit(x, y):
     print("hit x", x, " y ", y)
 
 
+def drag(start_tuple, end_tuple, duration, steps):
+    device.drag(start_tuple, end_tuple, duration, steps)
+    print("dragging")
+
+
 def hitautomatically(times):
     start = time.time()
     for i in range(1, times + 1):
@@ -121,4 +126,6 @@ while strAction != "Exit":
         captureImage()
     if strAction == "hit":
         hit(action["X"], action["Y"])
+    if strAction == "drag":
+        drag(action["start_tuple"], action["end_tuple"], action["duration"], action["steps"])
 

@@ -14,4 +14,6 @@ HIT_DICT = {"egg": (50, 525),
             "pet_gold_hit_normal": (427, 614),
             "heroes_tab": (178, 1258),
             "last_hero_upg": (606, 1172),
-            "before_last_hero_upg": (606, 1062)}
+            "before_last_hero_upg": (606, 1062),
+            "2_before_last_hero_upg": (606, 943),
+            "3_before_last_hero_upg": (606, 835)}

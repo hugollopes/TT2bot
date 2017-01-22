@@ -8,8 +8,8 @@ def capture_gold_forever(predictor):
         insert_command("capture")
         acknowledge()
         pred_dict = predictor.predict()
-        if int(pred_dict['gold_pet_predictor']) == 0:
-            if int(pred_dict['boss_active_predictor']) == 1:
+        if predictor.check_predict(pred_dict, 'gold_pet_predictor', "goldpet"):
+            if predictor.check_predict(pred_dict, 'boss_active_predictor', "boss_inactive"):
                 insert_command("hit", hit_pos="boss_toggle")
                 print("ready to get gold with boss")
                 time.sleep(0.2)
@@ -26,8 +26,12 @@ def capture_gold_forever(predictor):
 
 def upgrade_heroes():
     #insert_command("hit", hit_pos="heroes_tab") #must assume it is in the hero tab
+    insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
     insert_command("hit", hit_pos="last_hero_upg") #assumes well possitioned at the bottom of the heroes tab.
     insert_command("hit", hit_pos="before_last_hero_upg")
+    insert_command("hit", hit_pos="2_before_last_hero_upg")
+    insert_command("hit", hit_pos="3_before_last_hero_upg")
+    acknowledge()
 
 
 def acknowledge():

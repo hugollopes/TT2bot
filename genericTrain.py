@@ -359,6 +359,12 @@ class TT2Predictor:
         self.parse_raw_image()
         return self.predict_parsed_all()
 
+    def check_predict(self, pred_dict, predictor, classification):
+        for class_predictor in self.trainers_predictors_list:
+            if class_predictor.name == predictor:
+                return int(pred_dict['gold_pet_predictor']) == class_predictor.pred_classes.index(classification)
+
+
 
 
 """

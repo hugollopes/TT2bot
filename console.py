@@ -53,9 +53,10 @@ predictor = TT2Predictor()
 initialize_control_file()
 
 #todo: dynamic prediction hidden layer configuration
-#todo:generic drag command
+#todo: predict only requested
+#todo: generic drag command
 #todo: recognize level number
-#todo:  recognize active tabs
+#todo: recognize active tabs
 #todo: recognize heroes position
 #todo: reconize heroes data
 #todo: increment hero
@@ -100,4 +101,6 @@ while str(command) != 'wow':
             insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
     if command == "captureforgold" or command == "cg":
         capture_gold_forever(predictor)
+    if command == "drag":
+        insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
     previousCommand = command
