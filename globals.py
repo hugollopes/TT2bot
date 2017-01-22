@@ -11,4 +11,7 @@ HIT_DICT = {"egg": (50, 525),
             "Shinning_egg": (370, 355),
             "boss_toggle": (605, 49),
             "pet_gold_hit_center": (360, 562),
-            "pet_gold_hit_normal": (427, 614)}
+            "pet_gold_hit_normal": (427, 614),
+            "heroes_tab": (178, 1258),
+            "last_hero_upg": (606, 1172),
+            "before_last_hero_upg": (606, 1062)}

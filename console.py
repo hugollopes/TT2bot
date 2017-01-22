@@ -4,8 +4,6 @@ import pickle
 import sys
 import time
 import globals as glo
-from PIL import Image
-#from train import Processfile, predictpet
 from genericTrain import TT2Predictor
 from TT2actions import *
 
@@ -28,7 +26,6 @@ def get_total_number_files():
             count_total_number += 1
     return count_total_number
 """
-
 
 
 def initialize_control_file():
@@ -55,12 +52,6 @@ predictor = TT2Predictor()
 
 initialize_control_file()
 
-#total_number = get_total_number_files()
-#print("there are total ", total_number, "files")
-
-
-
-
 #todo: dynamic prediction hidden layer configuration
 #todo:generic drag command
 #todo: recognize level number
@@ -86,31 +77,27 @@ while str(command) != 'wow':
         attack_command(argv, parsed_command)
     if command == "hit":
         insert_command("hit", X=parsed_command[1], Y=parsed_command[2])
-        reset_acknowledge()
-        wait_acknowledge()
+        acknowledge()
     #if command == "processfile":
     #    Processfile()
     if command == "capture":
         insert_command("capture")
-        reset_acknowledge()
-        wait_acknowledge()
+        acknowledge()
     if command == "recognize" or command == "r":
-        reset_acknowledge()
         insert_command("capture")
-        wait_acknowledge()
-        predictor.parse_raw_image()
-        pred_dict = predictor.predict_parsed_all()
+        acknowledge()
+        pred_dict = predictor.predict()
         if int(pred_dict['egg_active_predictor']) == 0:
             print("capturing egg")
-            insert_command("hit", X=glo.HIT_DICT["egg"][0], Y=glo.HIT_DICT["egg"][1])
+            insert_command("hit", hit_pos="egg")
             time.sleep(0.5)
-            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1])
+            insert_command("hit", hit_pos="Shinning_egg")
             time.sleep(0.5)
-            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1])
+            insert_command("hit", hit_pos="Shinning_egg")
             time.sleep(1)
-            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1]) #one more hit to clear
+            insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
             time.sleep(1)
-            insert_command("hit", X=glo.HIT_DICT["Shinning_egg"][0], Y=glo.HIT_DICT["Shinning_egg"][1])  # one more hit to clear
+            insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
     if command == "captureforgold" or command == "cg":
         capture_gold_forever(predictor)
     previousCommand = command

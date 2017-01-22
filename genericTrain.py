@@ -355,6 +355,10 @@ class TT2Predictor:
             pred_dict[class_predictor.name] = class_predictor.predict_parsed()
         return pred_dict
 
+    def predict(self):
+        self.parse_raw_image()
+        return self.predict_parsed_all()
+
 
 
 """

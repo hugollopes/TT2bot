@@ -5,34 +5,37 @@ import time
 
 def capture_gold_forever(predictor):
     while True:
-        reset_acknowledge()
         insert_command("capture")
-        wait_acknowledge()
-        predictor.parse_raw_image()
-        pred_dict = predictor.predict_parsed_all()
+        acknowledge()
+        pred_dict = predictor.predict()
         if int(pred_dict['gold_pet_predictor']) == 0:
             if int(pred_dict['boss_active_predictor']) == 1:
                 insert_command("hit", hit_pos="boss_toggle")
-                #insert_command("hit", X=glo.HIT_DICT["boss_toggle"][0], Y=glo.HIT_DICT["boss_toggle"][1])
                 print("ready to get gold with boss")
-                time.sleep(0.5)
+                time.sleep(0.2)
                 insert_command("hit", hit_pos="pet_gold_hit_center")
                 insert_command("hit", hit_pos="pet_gold_hit_normal")
-                #insert_command("getgold")  # todo: remove gold for generic hit.
-                reset_acknowledge()
-                wait_acknowledge()
-                time.sleep(0.5)
+                acknowledge()
             else:
-                #insert_command("getgold")  # todo: remove gold for generic hit.
-                reset_acknowledge()
                 insert_command("hit", hit_pos="pet_gold_hit_center")
                 insert_command("hit", hit_pos="pet_gold_hit_normal")
                 print("ready to get gold")
-                wait_acknowledge()
+                acknowledge()
+            upgrade_heroes()
+
+
+def upgrade_heroes():
+    #insert_command("hit", hit_pos="heroes_tab") #must assume it is in the hero tab
+    insert_command("hit", hit_pos="last_hero_upg") #assumes well possitioned at the bottom of the heroes tab.
+    insert_command("hit", hit_pos="before_last_hero_upg")
+
+
+def acknowledge():
+    reset_acknowledge()
+    wait_acknowledge()
 
 
 def wait_acknowledge():
-
     done = "no"
     while done == "no":
         try:
