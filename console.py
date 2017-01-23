@@ -54,7 +54,6 @@ initialize_control_file()
 
 #todo: dynamic prediction hidden layer configuration
 #todo: predict only requested
-#todo: generic drag command
 #todo: recognize level number
 #todo: recognize active tabs
 #todo: recognize heroes position

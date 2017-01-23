@@ -346,7 +346,7 @@ class TT2Predictor:
         for class_predictor in self.trainers_predictors_list:
             class_predictor.predict_crop(image)
         image.save(glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + "/fullcapture"
-                   + time.strftime("%Y%m%d-%H%M%S-%f") + ".png") #save original capture copy
+                   + time.strftime("%Y%m%d-%H%M%S-%f") + ".png")  # save original capture copy
         print("parse and crop time: ", time.time() - start)
 
     def predict_parsed_all(self):
@@ -362,7 +362,7 @@ class TT2Predictor:
     def check_predict(self, pred_dict, predictor, classification):
         for class_predictor in self.trainers_predictors_list:
             if class_predictor.name == predictor:
-                return int(pred_dict['gold_pet_predictor']) == class_predictor.pred_classes.index(classification)
+                return int(pred_dict[predictor]) == class_predictor.pred_classes.index(classification)
 
 
 
