@@ -83,6 +83,7 @@ while str(command) != 'wow':
     if command == "capture":
         insert_command("capture")
         acknowledge()
+        predictor.parse_raw_image()
     if command == "recognize" or command == "r":
         recognize_and_get_egg(predictor, True)
     if command == "captureforgold" or command == "cg":

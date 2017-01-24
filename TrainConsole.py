@@ -11,6 +11,8 @@ new_predictor = TrainerPredictor("tab_predictor", ["skills_tab", "heroes_tab", "
                                             , 2, 179, 255.0
                                             , [200, 30])
 print("trainer created")
+#todo: need to crop images from alternative directory.
+#todo: need a capture and parse
 new_predictor.crop_images()
 # trainer.process_images()
 # trainer.read_and_pickle()
