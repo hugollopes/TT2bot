@@ -89,12 +89,12 @@ class TrainerPredictor:
                       + '.png')
             TrainerPredictor.images_count += 1
 
-    def predict_crop(self,image):
+    def predict_crop(self, image):
         crop = image.crop(self.crop_tuple)
-        crop.save(self.prediction_image_file) # save original crop
+        crop.save(self.prediction_image_file)  #  save original crop
         crop = crop.convert('L')
         crop = crop.resize((self.size_x, self.size_y))
-        crop.save(self.prediction_processed_image_file) # save resized and grayed crop
+        crop.save(self.prediction_processed_image_file)  #  save resized and grayed crop
 
     def process_images(self):
         """this method deletes the processed folder,
@@ -340,19 +340,24 @@ class TT2Predictor:
         save_pickle(saved_classes_file, self.trainers_predictors_list)
 
     def parse_raw_image(self):
-        start = time.time()
         with open(glo.RAW_FULL_FILE, 'rb') as f:
             image = Image.frombytes('RGBA', (1280, 720), f.read())
         for class_predictor in self.trainers_predictors_list:
             class_predictor.predict_crop(image)
         image.save(glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + "/fullcapture"
                    + time.strftime("%Y%m%d-%H%M%S-%f") + ".png")  # save original capture copy
-        print("parse and crop time: ", time.time() - start)
 
     def predict_parsed_all(self):
         pred_dict = {}
         for class_predictor in self.trainers_predictors_list:
             pred_dict[class_predictor.name] = class_predictor.predict_parsed()
+        return pred_dict
+
+    def predict_parsed(self, predict_map):
+        pred_dict = {}
+        for class_predictor in self.trainers_predictors_list:
+            if class_predictor.name in predict_map:
+                pred_dict[class_predictor.name] = class_predictor.predict_parsed()
         return pred_dict
 
     def predict(self):

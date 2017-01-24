@@ -53,7 +53,6 @@ predictor = TT2Predictor()
 initialize_control_file()
 
 #todo: dynamic prediction hidden layer configuration
-#todo: predict only requested
 #todo: recognize level number
 #todo: recognize active tabs
 #todo: recognize heroes position
@@ -61,9 +60,10 @@ initialize_control_file()
 #todo: increment hero
 #todo: store list of actions
 #todo: ml on actions
+#todo: optimize predictor, takes 2-3 seconds... too slow. maybe initialization time
 
 
-sCommands = "(a)ttack,capture,exit,(cg)captureforgold,processfile,(r)ecognize or ctlr-c':"
+sCommands = "(a)ttack,capture,exit,(cg)captureforgold,(p)lay,processfile,(r)ecognize or ctlr-c':"
 print(sCommands)
 command = ""
 previousCommand = ""
@@ -84,9 +84,11 @@ while str(command) != 'wow':
         insert_command("capture")
         acknowledge()
     if command == "recognize" or command == "r":
-        recognize_and_get_egg(predictor)
+        recognize_and_get_egg(predictor, True)
     if command == "captureforgold" or command == "cg":
         capture_gold_forever(predictor)
+    if command == "play" or command == "p":
+        play(predictor)
     if command == "drag":
         insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
     previousCommand = command
