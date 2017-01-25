@@ -6,16 +6,22 @@ import time
 
 def play(predictor):
     count_check_egg = 1000
+    count_attack = 0
     count = 0
     while True:
         print("run:", count)
         if count <= count_check_egg:
             capture_gold(predictor)
             count += 1
+            count_attack += 1
         else:
             print()
             recognize_and_get_egg(predictor, False)
             count = 0
+        if count_attack > 2:
+            insert_command("attack")
+            acknowledge()
+            count_attack = 0
 
 
 def capture_gold(predictor):
@@ -39,7 +45,7 @@ def capture_gold(predictor):
             insert_command("hit", hit_pos="pet_gold_hit_normal")
             print("ready to get gold")
             acknowledge()
-        upgrade_heroes()
+        upgrade_heroes(predictor)
 
 
 def capture_gold_forever(predictor):
@@ -63,21 +69,37 @@ def recognize_and_get_egg(predictor, capture):
         insert_command("hit", hit_pos="Shinning_egg")
         time.sleep(1)
         insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
-        time.sleep(1)
+        time.sleep(3)
         insert_command("hit", hit_pos="Shinning_egg")  # one more hit to clear
         acknowledge()
 
 
-
-
-def upgrade_heroes():
+def upgrade_heroes(predictor):
+    go_to_heroes_tab(predictor)
     #insert_command("hit", hit_pos="heroes_tab") #must assume it is in the hero tab
-    insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
+    #insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
+    insert_command("drag", drag_pos="drag_down_a_lot")
     insert_command("hit", hit_pos="last_hero_upg") #assumes well possitioned at the bottom of the heroes tab.
     insert_command("hit", hit_pos="before_last_hero_upg")
-    insert_command("hit", hit_pos="2_before_last_hero_upg")
-    insert_command("hit", hit_pos="3_before_last_hero_upg")
+    #insert_command("hit", hit_pos="2_before_last_hero_upg")
+    #insert_command("hit", hit_pos="3_before_last_hero_upg")
     acknowledge()
+
+
+def go_to_heroes_tab(predictor):
+    insert_command("capture")
+    acknowledge()
+    # start = time.time()
+    predictor.parse_raw_image()
+    pred_dict = predictor.predict_parsed(["tab_predictor"])
+    if predictor.check_predict(pred_dict, 'tab_predictor', "heroes_tab"):
+        pass
+    else:
+        insert_command("hit", hit_pos="heroes_tab")
+        acknowledge()
+
+
+
 
 
 def acknowledge():
@@ -119,6 +141,11 @@ def insert_command(_command, **kwargs):
                 if key == "hit_pos":
                     action["X"] = glo.HIT_DICT[value][0]
                     action["Y"] = glo.HIT_DICT[value][1]
+                if key == "drag_pos":
+                    action["start_tuple"] = glo.DRAG_DICT[value][0]
+                    action["end_tuple"] = glo.DRAG_DICT[value][1]
+                    action["duration"] = glo.DRAG_DICT[value][2]
+                    action["steps"] = glo.DRAG_DICT[value][3]
                 else:
                     action[key] = value
                     # print("%s == %s" % (key, value))

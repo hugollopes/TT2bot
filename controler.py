@@ -110,6 +110,16 @@ def read_action(control_file_path):
 print("jPython controller on")
 device = MonkeyRunner.waitForConnection()
 print("connected")
+print("try attack")
+
+try:
+    device.touch(350, 500, MonkeyDevice.DOWN_AND_UP)
+    print("touch worked.")
+except Exception:
+    print("reconnecting")
+    device = MonkeyRunner.waitForConnection()
+
+
 
 image_number = 1
 strControlFile = "C:\\ProgramData\\Bluestacks\\UserData\\SharedFolder\\controlaction.txt"

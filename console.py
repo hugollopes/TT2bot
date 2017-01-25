@@ -54,7 +54,6 @@ initialize_control_file()
 
 #todo: dynamic prediction hidden layer configuration
 #todo: recognize level number
-#todo: recognize active tabs
 #todo: recognize heroes position
 #todo: reconize heroes data
 #todo: increment hero

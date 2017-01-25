@@ -78,10 +78,13 @@ class TrainerPredictor:
         self.prediction_image_file = self.base_folder + '/' + self.name + 'prediction_crop.png'
         self.prediction_processed_image_file = self.base_folder + '/' + self.name + 'prediction_processed_crop.png'
 
-    def crop_images(self):
+    def crop_images(self, **kwargs):
         """ this function reads raw files, crops images, and places them in the unclassified folder"""
         print("cropping", self.name, ":", str(self.crop_tuple))
         image_files = os.listdir(glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER)
+        for key in kwargs:
+            if key == "selected_globals" and kwargs[key]:
+                image_files = os.listdir(glo.SELECTED_CAPTURES_FOLDER)
         for image_file in image_files:
             image = Image.open(glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + '/' + image_file)
             crop = image.crop(self.crop_tuple)
@@ -327,9 +330,15 @@ class TT2Predictor:
                                             , (624, 364, 734, 474)
                                             , 40, 40, 255.0
                                             , [200, 30])
+        tab_predictor = TrainerPredictor("tab_predictor", ["skills_tab", "heroes_tab", "equipment_tab",
+                                                           "pet_tab", "relic_tab", "shop_tab", "no_tab"]
+                                         , (51, 1, 59, 717)
+                                         , 2, 179, 255.0
+                                         , [200, 30])
         self.trainers_predictors_list.append(boss_trainer)
         self.trainers_predictors_list.append(egg_trainer)
         self.trainers_predictors_list.append(gold_pet_trainer)
+        self.trainers_predictors_list.append(tab_predictor)
         for trainer in self.trainers_predictors_list:
             pass
             #trainer.crop_images()
