@@ -1,17 +1,8 @@
 FROM gcr.io/tensorflow/tensorflow:latest
 MAINTAINER Hugo Lopes <hugo.l.lopes@google.com>
 
-# Pillow needs libjpeg by default as of 3.0.
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#        libjpeg8-dev \
-#        && \
-#    apt-get clean && \
-#    rm -rf /var/lib/apt/lists/*
-
 RUN pip install scikit-learn pyreadline Pillow
-
 RUN sudo apt-get update
-#RUN apt-get -y install tesseract-ocr  libtesseract-dev libleptonica-dev
 RUN pip install cython
 RUN apt-get -y install wget tar ca-certificates
 RUN apt-get install -y \
@@ -29,13 +20,6 @@ RUN apt-get install -y \
   python-tornado \
   wget \
   zlib1g-dev
-
-#RUN sudo apt-get  -y install python-distutils-extra tesseract-ocr tesseract-ocr-eng libopencv-dev libtesseract-dev libleptonica-dev python-all-dev swig libcv-dev python-opencv python-
-numpy python-setuptools build-essential subversion
-#RUN sudo apt-get -y install autoconf automake libtool
-#RUN sudo apt-get -y install libpng12-dev libjpeg62-dev libtiff4-dev zlib1g-dev
-#RUN sudo apt-get -y install checkinstall
-
 
 RUN mkdir ~/temp \
   && cd ~/temp/ \

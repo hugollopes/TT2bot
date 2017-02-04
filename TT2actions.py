@@ -19,8 +19,6 @@ def play(predictor):
             recognize_and_get_egg(predictor, False)
             count = 0
         if count_attack > 2:
-            insert_command("attack")
-            acknowledge()
             count_attack = 0
 
 
@@ -39,11 +37,22 @@ def capture_gold(predictor):
             time.sleep(0.2)
             insert_command("hit", hit_pos="pet_gold_hit_center")
             insert_command("hit", hit_pos="pet_gold_hit_normal")
+            insert_command("attack")
+            insert_command("attack")
+            insert_command("attack")
+            insert_command("attack")
+            insert_command("attack")
             acknowledge()
         else:
             insert_command("hit", hit_pos="pet_gold_hit_center")
             insert_command("hit", hit_pos="pet_gold_hit_normal")
             print("ready to get gold")
+            acknowledge()
+            insert_command("attack")
+            insert_command("attack")
+            insert_command("attack")
+            insert_command("attack")
+            insert_command("attack")
             acknowledge()
         upgrade_heroes(predictor)
 

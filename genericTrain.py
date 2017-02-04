@@ -8,6 +8,9 @@ from PIL import Image
 from TFFunctions import *
 from scipy import ndimage
 import shutil
+import tesserocr
+from tesserocr import PyTessBaseAPI, RIL, iterate_level
+import re
 
 
 
@@ -353,6 +356,55 @@ class TT2Predictor:
             image = Image.frombytes('RGBA', (1280, 720), f.read())
         for class_predictor in self.trainers_predictors_list:
             class_predictor.predict_crop(image)
+
+        import time
+
+        start = time.time()
+        print("getleveltime: ", time.time() - start)
+        with PyTessBaseAPI() as api:
+            #api.SetImageFile(glo.DATA_FOLDER + '/number_range_predictorcropped3.png')
+            img = image.crop((1195,323,1229,399))
+            print("getleveltime: ", time.time() - start)
+            #img.save(glo.DATA_FOLDER + "/cutlecvelnr.png")
+            img = img.rotate(90,expand=True)
+            print("getleveltime: ", time.time() - start)
+            #img.save(glo.DATA_FOLDER + "/cutlecvelr.png")
+            api.SetImage(img)
+            print("getleveltime: ", time.time() - start)
+            api.SetVariable("tessedit_char_whitelist", "0123456789")#abcdefghijklmnopqrstuvwxyz")
+            #api.SetPageSegMode(tesseract.PSM_AUTO)
+            api.SetVariable("tessedit_pageseg_mode", "7")
+            #img.save(glo.DATA_FOLDER + "/cutlecvel.png")
+            text_capture = api.GetUTF8Text().encode('utf-8').strip()
+            print("getleveltime: ", time.time() - start)
+            print("raw tesxt capture:",text_capture)
+            #striped_txt = re.sub(' +','',text_capture)
+            #print("recognized txt:", striped_txt)
+        end = time.time()
+        print ("getleveltime: ", time.time() - start)
+
+            # api.Recognize()
+        """
+            ri = api.GetIterator()
+            level = RIL.SYMBOL
+            for r in iterate_level(ri, level):
+                symbol = r.GetUTF8Text(level)  # r == ri
+                conf = r.Confidence(level)
+                print(u'symbol {}, conf: {}'.format(symbol, conf).encode('utf-8').strip())
+                indent = False
+                ci = r.GetChoiceIterator()
+                for c in ci:
+                    if indent:
+                        print('\t\t ', )
+                    print('\t- ', )
+                    choice = c.GetUTF8Text()  # c == ci
+                    print(u'{} conf: {}'.format(choice, c.Confidence()).encode('utf-8').strip())
+                    indent = True
+        """
+
+
+
+
         image.save(glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + "/fullcapture"
                    + time.strftime("%Y%m%d-%H%M%S-%f") + ".png")  # save original capture copy
 
