@@ -2,6 +2,8 @@ from __future__ import print_function
 import globals as glo
 import pickle
 import time
+import logging
+logging.basicConfig(filename=glo.DATA_FOLDER + '/actions.log', filemode='w', level=logging.DEBUG)
 
 
 def play(predictor):
@@ -30,9 +32,7 @@ def play(predictor):
 
 
 def capture_gold(predictor):
-    insert_command("capture")
-    acknowledge()
-    predictor.parse_raw_image()
+    capture_and_parse_raw_image(predictor)
     pred_dict = predictor.predict_parsed(["gold_pet_predictor"], ["previous_level", "main_level", "next_level"])
     if predictor.check_predict(pred_dict, 'gold_pet_predictor', "goldpet"):
         pred_dict = predictor.predict_parsed(["boss_active_predictor"], [])
@@ -50,6 +50,16 @@ def capture_gold(predictor):
             acknowledge()
 
 
+def capture_and_parse_raw_image(predictor):
+    transition_level = True
+    while transition_level:
+        insert_command("capture")
+        acknowledge()
+        predictor.parse_raw_image()
+        pred_dict = predictor.predict_parsed([], [])
+        transition_level = pred_dict["transition_level"]
+
+
 def capture_gold_forever(predictor):
     while True:
         capture_gold(predictor)
@@ -57,11 +67,10 @@ def capture_gold_forever(predictor):
 
 def recognize_and_get_egg(predictor, capture):
     if capture:
-        insert_command("capture")
-        acknowledge()
-        predictor.parse_raw_image()
+        capture_and_parse_raw_image(predictor)
     start = time.time()
-    pred_dict = predictor.predict_parsed(["egg_active_predictor"], ["previous_level", "main_level", "next_level", "last_hero"])
+    pred_dict = predictor.predict_parsed(["egg_active_predictor"],
+                                         ["previous_level", "main_level", "next_level", "last_hero"])
     print("prediction time: ", time.time() - start)
     if int(pred_dict['egg_active_predictor']) == 0:
         print("capturing egg")
@@ -96,14 +105,12 @@ def upgrade_all_heroes(predictor):
     first = False  # meaning we are in the first page
     heroes = []
     for _ in range(20):
-        insert_command("capture")
-        acknowledge()
-        predictor.parse_raw_image()
+        capture_and_parse_raw_image(predictor)
         pred_dict = predictor.predict_parsed([], ["previous_level", "main_level", "next_level", "last_hero"])
         heroes.append(pred_dict["last_hero"])
         if pred_dict["last_hero"] == "Lance, Knight of Cobalt Steel":
             first = True
-        insert_command("hit", hit_pos="last_hero_upg") #assumes well possitioned at the bottom of the heroes tab.
+        insert_command("hit", hit_pos="last_hero_upg")  # assumes well possitioned at the bottom of the heroes tab.
         insert_command("hit", hit_pos="last_hero_upg")
         insert_command("hit", hit_pos="last_hero_upg")
         insert_command("hit", hit_pos="last_hero_upg")
@@ -139,19 +146,13 @@ def capture_clan_boss(predictor):
 
 
 def go_to_heroes_tab(predictor):
-    insert_command("capture")
-    acknowledge()
-    # start = time.time()
-    predictor.parse_raw_image()
+    capture_and_parse_raw_image(predictor)
     pred_dict = predictor.predict_parsed(["tab_predictor"], [])
     if predictor.check_predict(pred_dict, 'tab_predictor', "heroes_tab"):
         pass
     else:
         insert_command("hit", hit_pos="heroes_tab")
         acknowledge()
-
-
-
 
 
 def acknowledge():
@@ -167,8 +168,9 @@ def wait_acknowledge():
             control_data = pickle.load(control_file)
             control_file.close()
             done = control_data["Done"]
-        except Exception:
-            print("error waiting acknowledgment")
+        except Exception as e:
+            logging.exception("error waiting acknowledgment")
+            logging.exception(e)
 
 
 def reset_acknowledge():
@@ -177,8 +179,9 @@ def reset_acknowledge():
         control_file = open(glo.ACKNOWLEDGE_FILE, "wb")
         pickle.dump(control_data, control_file, protocol=2)
         control_file.close()
-    except Exception:
-        print("some error writing acknowledge file")
+    except Exception as e:
+        logging.exception("some error writing acknowledge file")
+        logging.exception(e)
 
 
 def insert_command(_command, **kwargs):
@@ -206,5 +209,6 @@ def insert_command(_command, **kwargs):
         control_file = open(glo.CONTROL_FILE, "wb")
         pickle.dump(control_data, control_file, protocol=2)
         control_file.close()
-    except Exception:
+    except Exception as e:
         print("some error inserting command. action=nothing")
+        logging.exception(e)

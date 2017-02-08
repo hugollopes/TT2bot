@@ -78,8 +78,6 @@ while str(command) != 'wow':
     if command == "hit":
         insert_command("hit", X=parsed_command[1], Y=parsed_command[2])
         acknowledge()
-    #if command == "processfile":
-    #    Processfile()
     if command == "capture":
         insert_command("capture")
         acknowledge()

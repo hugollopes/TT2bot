@@ -402,8 +402,21 @@ class TT2Predictor:
             pred_dict[class_predictor.name] = class_predictor.predict_parsed()
         return pred_dict
 
-    def predict_parsed(self, predict_map, predict_map_text):
-        pred_dict = {}
+    def predict_parsed(self, predict_map, predict_map_text, **kwargs):
+        pred_dict = {"transition_level": False}
+
+        # check if image is level trasitioning. trivial prediction.
+        if hasattr(kwargs, "empty_image") and kwargs["empty_image"] is False:
+            pass
+        else:
+            img = self.global_image.crop((0, 0, 100, 100))  # black corner
+            extrema = img.convert("L").getextrema()
+            if extrema[0] == extrema[1]:   # only one color
+                print("warning level transitioning")
+                pred_dict["transition_level"] = True
+            else:
+                pass
+
         for class_predictor in self.trainers_predictors_list:
             if class_predictor.name in predict_map:
                 pred_dict[class_predictor.name] = class_predictor.predict_parsed()
