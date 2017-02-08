@@ -16,6 +16,7 @@
       <w>minibatch</w>
       <w>nopet</w>
       <w>normalpet</w>
+      <w>pageseg</w>
       <w>petdetectionmodel</w>
       <w>pred</w>
       <w>predictionsamples</w>
@@ -24,6 +25,8 @@
       <w>resizes</w>
       <w>rgba</w>
       <w>tbot</w>
+      <w>tessedit</w>
+      <w>whitelist</w>
     </words>
   </dictionary>
 </component>

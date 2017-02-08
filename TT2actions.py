@@ -5,56 +5,49 @@ import time
 
 
 def play(predictor):
-    count_check_egg = 1000
-    count_attack = 0
+    count_check_egg = 0
+    count_upgrade_all_heroes = 0
     count = 0
     while True:
         print("run:", count)
-        if count <= count_check_egg:
-            capture_gold(predictor)
-            count += 1
-            count_attack += 1
-        else:
-            print()
+        capture_gold(predictor)
+        upgrade_heroes(predictor)
+        insert_command("attack")
+        insert_command("attack")
+        insert_command("attack")
+        insert_command("attack")
+        insert_command("attack")
+        acknowledge()
+        count += 1
+        count_upgrade_all_heroes += 1
+        count_check_egg += 1
+        if count_check_egg >= 100:
             recognize_and_get_egg(predictor, False)
-            count = 0
-        if count_attack > 2:
-            count_attack = 0
+            count_check_egg = 0
+        if count_upgrade_all_heroes >= 30:
+            upgrade_all_heroes(predictor)
+            count_upgrade_all_heroes = 0
 
 
 def capture_gold(predictor):
     insert_command("capture")
     acknowledge()
-    #start = time.time()
     predictor.parse_raw_image()
-    pred_dict = predictor.predict_parsed(["gold_pet_predictor"])
-    #print("prediction time: ", time.time() - start)
+    pred_dict = predictor.predict_parsed(["gold_pet_predictor"], ["previous_level", "main_level", "next_level"])
     if predictor.check_predict(pred_dict, 'gold_pet_predictor', "goldpet"):
-        pred_dict = predictor.predict_parsed(["boss_active_predictor"])
+        pred_dict = predictor.predict_parsed(["boss_active_predictor"], [])
         if predictor.check_predict(pred_dict, 'boss_active_predictor', "boss_inactive"):
             insert_command("hit", hit_pos="boss_toggle")
             print("ready to get gold with boss")
             time.sleep(0.2)
             insert_command("hit", hit_pos="pet_gold_hit_center")
             insert_command("hit", hit_pos="pet_gold_hit_normal")
-            insert_command("attack")
-            insert_command("attack")
-            insert_command("attack")
-            insert_command("attack")
-            insert_command("attack")
             acknowledge()
         else:
             insert_command("hit", hit_pos="pet_gold_hit_center")
             insert_command("hit", hit_pos="pet_gold_hit_normal")
             print("ready to get gold")
             acknowledge()
-            insert_command("attack")
-            insert_command("attack")
-            insert_command("attack")
-            insert_command("attack")
-            insert_command("attack")
-            acknowledge()
-        upgrade_heroes(predictor)
 
 
 def capture_gold_forever(predictor):
@@ -67,8 +60,9 @@ def recognize_and_get_egg(predictor, capture):
         insert_command("capture")
         acknowledge()
         predictor.parse_raw_image()
-    pred_dict = predictor.predict_parsed(["egg_active_predictor"])
-    #pred_dict = predictor.predict()
+    start = time.time()
+    pred_dict = predictor.predict_parsed(["egg_active_predictor"], ["previous_level", "main_level", "next_level", "last_hero"])
+    print("prediction time: ", time.time() - start)
     if int(pred_dict['egg_active_predictor']) == 0:
         print("capturing egg")
         insert_command("hit", hit_pos="egg")
@@ -88,11 +82,60 @@ def upgrade_heroes(predictor):
     #insert_command("hit", hit_pos="heroes_tab") #must assume it is in the hero tab
     #insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
     insert_command("drag", drag_pos="drag_down_a_lot")
-    insert_command("hit", hit_pos="last_hero_upg") #assumes well possitioned at the bottom of the heroes tab.
+    #insert_command("hit", hit_pos="last_hero_upg") #assumes well possitioned at the bottom of the heroes tab.
     insert_command("hit", hit_pos="before_last_hero_upg")
     #insert_command("hit", hit_pos="2_before_last_hero_upg")
     #insert_command("hit", hit_pos="3_before_last_hero_upg")
     acknowledge()
+
+
+def upgrade_all_heroes(predictor):
+    go_to_heroes_tab(predictor)
+    for _ in range(10):
+        insert_command("drag", drag_pos="drag_down_a_lot")
+    first = False  # meaning we are in the first page
+    heroes = []
+    for _ in range(20):
+        insert_command("capture")
+        acknowledge()
+        predictor.parse_raw_image()
+        pred_dict = predictor.predict_parsed([], ["previous_level", "main_level", "next_level", "last_hero"])
+        heroes.append(pred_dict["last_hero"])
+        if pred_dict["last_hero"] == "Lance, Knight of Cobalt Steel":
+            first = True
+        insert_command("hit", hit_pos="last_hero_upg") #assumes well possitioned at the bottom of the heroes tab.
+        insert_command("hit", hit_pos="last_hero_upg")
+        insert_command("hit", hit_pos="last_hero_upg")
+        insert_command("hit", hit_pos="last_hero_upg")
+        insert_command("hit", hit_pos="last_hero_upg")
+        insert_command("hit", hit_pos="last_hero_upg")
+        acknowledge()
+        insert_command("drag", drag_pos="drag_1_hero_up")
+        acknowledge()
+    print(heroes)
+
+
+def capture_clan_boss(predictor):
+    insert_command("hit", hit_pos="hit_clan")
+    acknowledge()
+    time.sleep(2)
+    insert_command("hit", hit_pos="hit_clan_quest")
+    acknowledge()
+    time.sleep(4)
+    insert_command("hit", hit_pos="boss_fight")
+    acknowledge()
+    time.sleep(4)
+    insert_command("attack")
+    insert_command("attack")
+    insert_command("attack")
+    insert_command("attack")
+    time.sleep(4)
+    insert_command("hit", hit_pos="close_clan_quest")
+    acknowledge()
+    time.sleep(1)
+    insert_command("hit", hit_pos="close_clan")
+    acknowledge()
+    time.sleep(1)
 
 
 def go_to_heroes_tab(predictor):
@@ -100,7 +143,7 @@ def go_to_heroes_tab(predictor):
     acknowledge()
     # start = time.time()
     predictor.parse_raw_image()
-    pred_dict = predictor.predict_parsed(["tab_predictor"])
+    pred_dict = predictor.predict_parsed(["tab_predictor"], [])
     if predictor.check_predict(pred_dict, 'tab_predictor', "heroes_tab"):
         pass
     else:

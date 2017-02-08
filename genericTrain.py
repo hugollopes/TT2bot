@@ -8,8 +8,10 @@ from PIL import Image
 from TFFunctions import *
 from scipy import ndimage
 import shutil
+from abc import ABCMeta, abstractmethod
 import tesserocr
 from tesserocr import PyTessBaseAPI, RIL, iterate_level
+from CurrentStatus import CurrentStatus
 import re
 
 
@@ -17,7 +19,6 @@ import re
 #
 # goal of this module is to implement generic training/ predictor objects
 #
-
 #todo: make debuging in the docker image.
 
 
@@ -288,7 +289,7 @@ class TrainerPredictor:
         # print("targetfile",targetfile)
         shutil.copy(self.prediction_image_file, target_file)
 
-    def predict_parsed(self):#filecounts):
+    def predict_parsed(self):
         print("predicting ",self.name)
         tf.reset_default_graph()
         sess = tf.Session()
@@ -321,6 +322,22 @@ class TT2Predictor:
 
     def __init__(self, **kwargs):
         self.trainers_predictors_list = []
+        self.text_predictors_list = [("previous_level", (1212, 231, 1230, 280), "0123456789", "8"),
+                                     ("main_level", (1203, 323, 1223, 399), "0123456789", "8"),
+                                     ("next_level", (1212, 445, 1230, 493), "0123456789", "8"),
+                                     ("sub_level", (1177, 625, 1203, 692), "0123456789/", "8"),
+                                     ("gold", (1091, 283, 1126, 471), "0123456789.abcdefghijklmnopqrstuvwxyz", "7"),
+                                     ("current_dps_down_no_tab", (389, 562, 423, 709),
+                                      "0123456789.abcdefghijklmnopqrstuvwxyz", "8"),
+                                     ("last_hero", (124, 109, 148, 430),
+                                      "0123456789.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", "7")]
+        self.api = PyTessBaseAPI()
+        self.api.Init()
+        print(tesserocr.tesseract_version())
+        print(tesserocr.get_languages())
+        self.global_image = None
+        self.status = CurrentStatus()
+
         boss_trainer = TrainerPredictor("boss_active_predictor", ["boss_active", "boss_inactive", "no_boss"]
                                         , (1224, 555, 1248, 648)
                                         , 12, 46, 255.0
@@ -356,57 +373,28 @@ class TT2Predictor:
             image = Image.frombytes('RGBA', (1280, 720), f.read())
         for class_predictor in self.trainers_predictors_list:
             class_predictor.predict_crop(image)
-
-        import time
-
-        start = time.time()
-        print("getleveltime: ", time.time() - start)
-        with PyTessBaseAPI() as api:
-            #api.SetImageFile(glo.DATA_FOLDER + '/number_range_predictorcropped3.png')
-            img = image.crop((1195,323,1229,399))
-            print("getleveltime: ", time.time() - start)
-            #img.save(glo.DATA_FOLDER + "/cutlecvelnr.png")
-            img = img.rotate(90,expand=True)
-            print("getleveltime: ", time.time() - start)
-            #img.save(glo.DATA_FOLDER + "/cutlecvelr.png")
-            api.SetImage(img)
-            print("getleveltime: ", time.time() - start)
-            api.SetVariable("tessedit_char_whitelist", "0123456789")#abcdefghijklmnopqrstuvwxyz")
-            #api.SetPageSegMode(tesseract.PSM_AUTO)
-            api.SetVariable("tessedit_pageseg_mode", "7")
-            #img.save(glo.DATA_FOLDER + "/cutlecvel.png")
-            text_capture = api.GetUTF8Text().encode('utf-8').strip()
-            print("getleveltime: ", time.time() - start)
-            print("raw tesxt capture:",text_capture)
-            #striped_txt = re.sub(' +','',text_capture)
-            #print("recognized txt:", striped_txt)
-        end = time.time()
-        print ("getleveltime: ", time.time() - start)
-
-            # api.Recognize()
-        """
-            ri = api.GetIterator()
-            level = RIL.SYMBOL
-            for r in iterate_level(ri, level):
-                symbol = r.GetUTF8Text(level)  # r == ri
-                conf = r.Confidence(level)
-                print(u'symbol {}, conf: {}'.format(symbol, conf).encode('utf-8').strip())
-                indent = False
-                ci = r.GetChoiceIterator()
-                for c in ci:
-                    if indent:
-                        print('\t\t ', )
-                    print('\t- ', )
-                    choice = c.GetUTF8Text()  # c == ci
-                    print(u'{} conf: {}'.format(choice, c.Confidence()).encode('utf-8').strip())
-                    indent = True
-        """
-
-
-
-
+        self.global_image = image
         image.save(glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + "/fullcapture"
                    + time.strftime("%Y%m%d-%H%M%S-%f") + ".png")  # save original capture copy
+
+    def parse_image_text(self, predict_map):
+        return_dict = {}
+        for text_predictor in self.text_predictors_list:
+            if text_predictor[0] in predict_map:
+                img = self.global_image.crop(text_predictor[1])
+
+                img = img.convert('L')
+                img = img.rotate(90, expand=True)
+                self.api.SetImage(img)
+                self.api.SetVariable("tessedit_char_whitelist", text_predictor[2])
+                self.api.SetVariable("tessedit_pageseg_mode", text_predictor[3])
+                self.api.SetVariable("language_model_penalty_non_dict_word", "0")
+                self.api.SetVariable("doc_dict_enable", "0")
+                text_capture = self.api.GetUTF8Text().encode('utf-8').strip()
+                return_dict[text_predictor[0]] = text_capture
+                print("raw text capture ", text_predictor[0], ":", text_capture)
+                self.api.Clear()
+        return return_dict
 
     def predict_parsed_all(self):
         pred_dict = {}
@@ -414,11 +402,14 @@ class TT2Predictor:
             pred_dict[class_predictor.name] = class_predictor.predict_parsed()
         return pred_dict
 
-    def predict_parsed(self, predict_map):
+    def predict_parsed(self, predict_map, predict_map_text):
         pred_dict = {}
         for class_predictor in self.trainers_predictors_list:
             if class_predictor.name in predict_map:
                 pred_dict[class_predictor.name] = class_predictor.predict_parsed()
+        pred_dict_text = self.parse_image_text(predict_map_text)
+        pred_dict.update(pred_dict_text)
+        self.status.update_status(pred_dict, self.trainers_predictors_list)
         return pred_dict
 
     def predict(self):
@@ -429,6 +420,7 @@ class TT2Predictor:
         for class_predictor in self.trainers_predictors_list:
             if class_predictor.name == predictor:
                 return int(pred_dict[predictor]) == class_predictor.pred_classes.index(classification)
+
 
 
 

@@ -4,9 +4,7 @@ import globals as glo
 
 
 from PIL import Image
-#import pytesseract
 import tesserocr
-from tesserocr import PyTessBaseAPI
 print (tesserocr.tesseract_version() )
 print(tesserocr.get_languages())
 images = [glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + '/fullcapture961 .png']
@@ -20,33 +18,37 @@ images = [glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + '/fullcapture961 .png']
 img = Image.open(glo.DATA_FOLDER + '/number_range_predictorcropped3.png')#glo.UNCLASSIFIED_GLOBAL_CAPTURES_FOLDER + '/fullcapture961 .png')
 #img = img.convert('L')
 
-from tesserocr import PyTessBaseAPI, RIL, iterate_level
+from tesserocr import PyTessBaseAPI, RIL, iterate_level,PSM
+#print(help(tesserocr))
 
-with PyTessBaseAPI() as api:
-    api.SetImageFile(glo.DATA_FOLDER + '/number_range_predictorcropped3.png')
-    #api.SetVariable("tessedit_pageseg_mode", "10")
-    print("recognized txt:",api.GetUTF8Text().encode('utf-8').strip())
-    #api.Recognize()
-
-    ri = api.GetIterator()
-    level = RIL.SYMBOL
-    for r in iterate_level(ri, level):
-        symbol = r.GetUTF8Text(level)  # r == ri
-        conf = r.Confidence(level)
-        print(u'symbol {}, conf: {}'.format(symbol, conf).encode('utf-8').strip())
-        indent = False
-        ci = r.GetChoiceIterator()
-        for c in ci:
-            if indent:
-                print('\t\t ',)
-            print('\t- ',)
-            choice = c.GetUTF8Text()  # c == ci
-            print(            u'{} conf: {}'.format(choice, c.Confidence()).encode('utf-8').strip())
-            indent = True
+api = PyTessBaseAPI()
+api.Init()
+api.SetImageFile(glo.DATA_FOLDER + '/number_range_predictorcropped3.png')
+api.SetVariable("tessedit_pageseg_mode", "7")
+api.SetVariable("language_model_penalty_non_dict_word","0")
+api.SetVariable("doc_dict_enable", "0")
+print("recognized txt:",api.GetUTF8Text().encode('utf-8').strip())
+#api.Recognize()
+"""
+ri = api.GetIterator()
+level = RIL.SYMBOL
+for r in iterate_level(ri, level):
+    symbol = r.GetUTF8Text(level)  # r == ri
+    conf = r.Confidence(level)
+    print(u'symbol {}, conf: {}'.format(symbol, conf).encode('utf-8').strip())
+    indent = False
+    ci = r.GetChoiceIterator()
+    for c in ci:
+        if indent:
+            print('\t\t ',)
+        print('\t- ',)
+        choice = c.GetUTF8Text()  # c == ci
+        print(            u'{} conf: {}'.format(choice, c.Confidence()).encode('utf-8').strip())
+        indent = True
 
 
     #print("aquiiii", tesserocr.image_to_text(img))
-
+"""
 
 predictor = TT2Predictor()
 print("creating new trainer")
@@ -57,7 +59,6 @@ new_predictor = TrainerPredictor("tab_predictor", ["skills_tab", "heroes_tab", "
                                          , [200, 30])
 
 print("trainer created")
-#todo: need a capture and parse
 #todo: need a number by time on created crops or copying the original name.
 #new_predictor.crop_images(selected_globals=True)
 #new_predictor.process_images()

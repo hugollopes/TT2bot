@@ -50,10 +50,11 @@ def attack_command(_argv, _parsed_command):
 
 predictor = TT2Predictor()
 
+
 initialize_control_file()
 
 #todo: dynamic prediction hidden layer configuration
-#todo: recognize level number
+#todo: current game status
 #todo: recognize heroes position
 #todo: reconize heroes data
 #todo: increment hero
@@ -62,7 +63,7 @@ initialize_control_file()
 #todo: optimize predictor, takes 2-3 seconds... too slow. maybe initialization time
 
 
-sCommands = "(a)ttack,capture,exit,(cg)captureforgold,(p)lay,processfile,(r)ecognize or ctlr-c':"
+sCommands = "(a)ttack,capture,(b)oss,(cg)captureforgold,(p)lay,processfile,(r)ecognize,(u)grade or ctlr-c':"
 print(sCommands)
 command = ""
 previousCommand = ""
@@ -90,5 +91,9 @@ while str(command) != 'wow':
     if command == "play" or command == "p":
         play(predictor)
     if command == "drag":
-        insert_command("drag", start_tuple=(296, 1179), end_tuple=(293, 833), duration=0.5, steps=10)
+        insert_command("drag", drag_pos="drag_1_hero_up")
+    if command == "upgrade" or command == "u":
+        upgrade_all_heroes(predictor)
+    if command == "boss" or command == "b":
+        capture_clan_boss(predictor)
     previousCommand = command
